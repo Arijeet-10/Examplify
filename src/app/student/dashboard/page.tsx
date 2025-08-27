@@ -29,6 +29,8 @@ export default function StudentDashboard() {
     const unsubscribe = onSnapshot(examsQuery, async (snapshot) => {
       const examListPromises = snapshot.docs.map(async (doc) => {
         const data = doc.data();
+        // To get the question count, we need to query the subcollection.
+        // This is a separate read operation for each exam.
         const questionsSnapshot = await getDocs(collection(db, "exams", doc.id, "questions"));
         return {
           id: doc.id,
@@ -37,7 +39,7 @@ export default function StudentDashboard() {
           duration: data.duration,
           date: data.date,
           status: data.status,
-          questionCount: questionsSnapshot.size,
+          questionCount: questionsSnapshot.size, // Get the count of questions
         } as Exam;
       });
 
@@ -46,6 +48,7 @@ export default function StudentDashboard() {
       setIsLoading(false);
     });
 
+    // Clean up the listener when the component unmounts
     return () => unsubscribe();
   }, []);
 
