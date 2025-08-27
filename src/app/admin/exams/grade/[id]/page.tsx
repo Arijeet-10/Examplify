@@ -20,7 +20,8 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function GradingPage({ params: { id } }: { params: { id: string } }) {
+export default function GradingPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const [exam, setExam] = useState<Exam | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
