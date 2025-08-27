@@ -1,6 +1,7 @@
 
 
 export type GeneratedQuestion = {
+    id: string;
     question: string;
     answer: string;
     type: 'mcq' | 'descriptive';
@@ -14,7 +15,7 @@ export type Exam = {
     duration: number;
     date: string;
     status: 'Draft' | 'Published' | 'Ongoing' | 'Completed';
-    questionCount: number;
+    questionCount?: number; // Make optional as it's not always present on the doc itself
 };
 
 export type Student = {
