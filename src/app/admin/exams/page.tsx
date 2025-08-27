@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,10 +24,24 @@ import {
 import { MoreHorizontal, PlusCircle } from "lucide-react";
 import type { Exam } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+
 
 export default function ExamsPage() {
   const [exams, setExams] = useState<Exam[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const examsColRef = collection(db, "exams");
@@ -49,6 +63,27 @@ export default function ExamsPage() {
 
     return () => unsubscribe();
   }, []);
+
+  const handleDeleteExam = async (examId: string) => {
+    // In a real app, you might want to also delete subcollections recursively.
+    // Firestore doesn't support this natively on the client, so it would
+    // require a Cloud Function for a complete cleanup.
+    try {
+      await deleteDoc(doc(db, "exams", examId));
+      toast({
+        title: "Exam Deleted",
+        description: "The exam has been successfully deleted.",
+      });
+    } catch (error) {
+      console.error("Error deleting exam:", error);
+      toast({
+        variant: "destructive",
+        title: "Deletion Failed",
+        description: "An error occurred while deleting the exam.",
+      });
+    }
+  };
+
 
   const getBadgeVariant = (status: string) => {
     switch (status) {
@@ -114,22 +149,43 @@ export default function ExamsPage() {
                     </TableCell>
                     <TableCell>{exam.date}</TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
-                          <DropdownMenuItem>Monitor</DropdownMenuItem>
-                          <DropdownMenuItem>Grade</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive">
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                       <AlertDialog>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                               <Link href={`/admin/exams/edit/${exam.id}`}>
+                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                               </Link>
+                              <DropdownMenuItem>Monitor</DropdownMenuItem>
+                              <DropdownMenuItem>Grade</DropdownMenuItem>
+                              <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-destructive">
+                                  Delete
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the exam
+                                and all its questions.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeleteExam(exam.id)} className="bg-destructive hover:bg-destructive/90">
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                       </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))

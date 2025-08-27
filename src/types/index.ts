@@ -1,7 +1,6 @@
 
-
 export type GeneratedQuestion = {
-    id: string;
+    id: string; // Can be from Firestore or a temporary client-side ID
     question: string;
     answer: string;
     type: 'mcq' | 'descriptive';
