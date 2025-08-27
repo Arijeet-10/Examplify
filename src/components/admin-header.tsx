@@ -1,9 +1,6 @@
 "use client";
 
 import {
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -13,30 +10,47 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, User } from "lucide-react";
+import { BookOpenCheck, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import type { usePathname } from "next/navigation";
+import { AdminNav } from "./admin-nav";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { PanelLeft } from "lucide-react";
 
-type AdminHeaderProps = {
-  pathname: ReturnType<typeof usePathname>;
-};
-
-export function AdminHeader({ pathname }: AdminHeaderProps) {
-  const getTitle = () => {
-    if (pathname.startsWith("/admin/exams/create")) return "Create Exam";
-    if (pathname.startsWith("/admin/exams")) return "Exams";
-    if (pathname.startsWith("/admin/students")) return "Students";
-    if (pathname.startsWith("/admin/monitoring")) return "Exam Monitoring";
-    if (pathname.startsWith("/admin/dashboard")) return "Dashboard";
-    return "Admin Panel";
-  };
-
+export function AdminHeader() {
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
-      <SidebarTrigger className="md:hidden" />
-      <h1 className="text-xl font-semibold md:text-2xl font-headline">
-        {getTitle()}
-      </h1>
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur-sm px-4 md:px-6">
+      <Link
+        href="/admin/dashboard"
+        className="mr-6 hidden items-center space-x-2 md:flex"
+      >
+        <BookOpenCheck className="h-6 w-6 text-primary" />
+        <span className="font-bold font-headline text-lg">Examplify</span>
+      </Link>
+      
+      <div className="md:hidden">
+         <Sheet>
+            <SheetTrigger asChild>
+                <Button size="icon" variant="outline">
+                    <PanelLeft className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-60 p-2">
+                 <div className="p-2 border-b mb-2">
+                     <Link href="/admin/dashboard" className="flex items-center gap-2">
+                        <BookOpenCheck className="h-6 w-6 text-primary" />
+                        <span className="font-bold font-headline text-lg">Examplify</span>
+                    </Link>
+                </div>
+                <AdminNav isMobile={true} />
+            </SheetContent>
+         </Sheet>
+      </div>
+
+      <div className="hidden md:block">
+        <AdminNav />
+      </div>
+
       <div className="ml-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
