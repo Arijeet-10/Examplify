@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -24,8 +25,15 @@ import { useToast } from "@/hooks/use-toast";
 import { UploadCloud, FileText, Bot, AlertCircle } from "lucide-react";
 import { generateExamQuestions } from "@/ai/flows/generate-exam-questions";
 import type { GenerateExamQuestionsOutput } from "@/ai/flows/generate-exam-questions";
+import type { GeneratedQuestion } from "@/types";
 
-export function QuestionGenerator() {
+
+interface QuestionGeneratorProps {
+    onQuestionsGenerated: (questions: GeneratedQuestion[]) => void;
+}
+
+
+export function QuestionGenerator({ onQuestionsGenerated }: QuestionGeneratorProps) {
   const [file, setFile] = useState<File | null>(null);
   const [numQuestions, setNumQuestions] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +43,7 @@ export function QuestionGenerator() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setFile(event.target.files[0]);
+      setGeneratedQuestions([]);
     }
   };
 
@@ -91,6 +100,11 @@ export function QuestionGenerator() {
         setIsLoading(false);
     }
   };
+  
+  const handleAddQuestions = () => {
+    onQuestionsGenerated(generatedQuestions);
+    setGeneratedQuestions([]); // Clear after adding
+  }
 
   return (
     <Card className="w-full">
@@ -167,7 +181,7 @@ export function QuestionGenerator() {
       </CardContent>
       {generatedQuestions.length > 0 && 
         <CardFooter>
-            <Button variant="outline" className="w-full">Add Questions to Exam</Button>
+            <Button variant="outline" className="w-full" onClick={handleAddQuestions}>Add Questions to Exam</Button>
         </CardFooter>
       }
     </Card>
