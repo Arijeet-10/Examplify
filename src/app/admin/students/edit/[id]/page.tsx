@@ -15,7 +15,7 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export default function EditStudentPage({ params }: { params: { id: string } }) {
+export default function EditStudentPage({ params: { id } }: { params: { id: string } }) {
     const [student, setStudent] = useState<Student | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +27,7 @@ export default function EditStudentPage({ params }: { params: { id: string } }) 
         const fetchStudentData = async () => {
             setIsLoading(true);
             try {
-                const studentDocRef = doc(db, "students", params.id);
+                const studentDocRef = doc(db, "students", id);
                 const studentSnapshot = await getDoc(studentDocRef);
 
                 if (!studentSnapshot.exists()) {
@@ -44,15 +44,15 @@ export default function EditStudentPage({ params }: { params: { id: string } }) 
             }
         };
 
-        if (params.id) {
+        if (id) {
             fetchStudentData();
         }
-    }, [params.id]);
+    }, [id]);
 
     const handleUpdateStudent = async (data: { name: string; studentId: string; status: "Active" | "Inactive" }) => {
         setIsSubmitting(true);
         try {
-            const studentDocRef = doc(db, "students", params.id);
+            const studentDocRef = doc(db, "students", id);
             await updateDoc(studentDocRef, data);
 
             toast({
