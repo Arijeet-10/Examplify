@@ -14,7 +14,7 @@ export default function CreateExamPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleCreateExam = async (examData: Omit<Exam, 'id' | 'status'>, questions: GeneratedQuestion[]) => {
+  const handleCreateExam = async (examData: Omit<Exam, 'id'>, questions: GeneratedQuestion[]) => {
     if (questions.length === 0) {
       toast({
         variant: "destructive",
@@ -31,7 +31,7 @@ export default function CreateExamPage() {
       const examDocRef = await addDoc(collection(db, "exams"), {
         ...examData,
         createdAt: new Date(),
-        status: "Draft",
+        status: examData.status || "Draft", // Ensure status is set
       });
 
       // Add questions to a subcollection

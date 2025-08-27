@@ -54,7 +54,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
     }, [params.id]);
 
 
-    const handleUpdateExam = async (examData: Omit<Exam, 'id' | 'status'>, questions: GeneratedQuestion[]) => {
+    const handleUpdateExam = async (examData: Omit<Exam, 'id'>, questions: GeneratedQuestion[]) => {
         if (questions.length === 0) {
             toast({
                 variant: "destructive",
@@ -148,4 +148,3 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
         />
     );
 }
-

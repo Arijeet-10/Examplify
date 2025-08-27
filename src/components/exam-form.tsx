@@ -26,6 +26,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Bot, Plus, Trash2, Wand, X } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question: GeneratedQuestion) => void }) {
     const [questionType, setQuestionType] = useState<'mcq' | 'descriptive'>('mcq');
@@ -155,7 +163,7 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
 interface ExamFormProps {
     mode: 'create' | 'edit';
     initialData?: { exam: Exam, questions: GeneratedQuestion[] } | null;
-    onSubmit: (examData: Omit<Exam, 'id' | 'status'>, questions: GeneratedQuestion[]) => Promise<void>;
+    onSubmit: (examData: Omit<Exam, 'id'>, questions: GeneratedQuestion[]) => Promise<void>;
     isLoading: boolean;
 }
 
@@ -164,6 +172,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [date, setDate] = useState("");
+  const [status, setStatus] = useState<Exam['status']>('Draft');
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
   
   const router = useRouter();
@@ -175,6 +184,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
         setDescription(initialData.exam.description);
         setDuration(String(initialData.exam.duration));
         setDate(initialData.exam.date);
+        setStatus(initialData.exam.status);
         setQuestions(initialData.questions);
     }
   }, [mode, initialData])
@@ -189,7 +199,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
       });
       return;
     }
-    const examData = { title, description, duration: Number(duration), date };
+    const examData = { title, description, duration: Number(duration), date, status };
     onSubmit(examData, questions);
   }
 
@@ -238,7 +248,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
               required
             />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="exam-duration">Duration (in minutes)</Label>
               <Input id="exam-duration" type="number" placeholder="e.g., 90" value={duration} onChange={(e) => setDuration(e.target.value)} required />
@@ -246,6 +256,20 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
              <div className="space-y-2">
               <Label htmlFor="exam-date">Exam Date</Label>
               <Input id="exam-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="exam-status">Status</Label>
+                <Select onValueChange={(value) => setStatus(value as Exam['status'])} value={status}>
+                    <SelectTrigger id="exam-status">
+                        <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Draft">Draft</SelectItem>
+                        <SelectItem value="Published">Published</SelectItem>
+                        <SelectItem value="Ongoing">Ongoing</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
           </div>
         </CardContent>
