@@ -1,4 +1,10 @@
+
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -16,39 +22,34 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-
-const mockExams = [
-  {
-    id: "EXM001",
-    title: "Mid-Term Physics",
-    status: "Published",
-    students: 120,
-    date: "2024-08-15",
-  },
-  {
-    id: "EXM002",
-    title: "Final Year Chemistry",
-    status: "Draft",
-    students: 0,
-    date: "2024-09-01",
-  },
-  {
-    id: "EXM003",
-    title: "History Pop Quiz",
-    status: "Completed",
-    students: 250,
-    date: "2024-07-20",
-  },
-   {
-    id: "EXM004",
-    title: "Calculus I",
-    status: "Ongoing",
-    students: 85,
-    date: "2024-08-10",
-  },
-];
+import type { Exam } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ExamsPage() {
+  const [exams, setExams] = useState<Exam[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const examsColRef = collection(db, "exams");
+    const unsubscribe = onSnapshot(examsColRef, async (snapshot) => {
+        const examList = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                title: data.title,
+                status: data.status,
+                date: data.date,
+                duration: data.duration,
+                description: data.description,
+            } as Exam;
+        });
+        setExams(examList);
+        setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const getBadgeVariant = (status: string) => {
     switch (status) {
       case "Published":
@@ -79,10 +80,8 @@ export default function ExamsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Exam ID</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Students</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>
                 <span className="sr-only">Actions</span>
@@ -90,37 +89,51 @@ export default function ExamsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockExams.map((exam) => (
-              <TableRow key={exam.id}>
-                <TableCell className="font-medium">{exam.id}</TableCell>
-                <TableCell>{exam.title}</TableCell>
-                <TableCell>
-                  <Badge variant={getBadgeVariant(exam.status)}>
-                    {exam.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>{exam.students}</TableCell>
-                <TableCell>{exam.date}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem>Monitor</DropdownMenuItem>
-                      <DropdownMenuItem>Grade</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
+            {isLoading ? (
+               Array.from({ length: 4 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell colSpan={4}>
+                    <Skeleton className="h-10 w-full" />
+                  </TableCell>
+                </TableRow>
+               ))
+            ) : exams.length === 0 ? (
+                <TableRow>
+                    <TableCell colSpan={4} className="text-center h-24">
+                        No exams created yet.
+                    </TableCell>
+                </TableRow>
+            ) : (
+                exams.map((exam) => (
+                  <TableRow key={exam.id}>
+                    <TableCell className="font-medium">{exam.title}</TableCell>
+                    <TableCell>
+                      <Badge variant={getBadgeVariant(exam.status)}>
+                        {exam.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{exam.date}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem>Monitor</DropdownMenuItem>
+                          <DropdownMenuItem>Grade</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive">
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))
+            )}
           </TableBody>
         </Table>
       </div>
