@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -162,7 +163,9 @@ export default function ExamsPage() {
                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                                </Link>
                               <DropdownMenuItem>Monitor</DropdownMenuItem>
-                              <DropdownMenuItem>Grade</DropdownMenuItem>
+                               <Link href={`/admin/exams/grade/${exam.id}`}>
+                                <DropdownMenuItem>Grade</DropdownMenuItem>
+                               </Link>
                               <AlertDialogTrigger asChild>
                                 <DropdownMenuItem className="text-destructive">
                                   Delete
@@ -196,3 +199,5 @@ export default function ExamsPage() {
     </div>
   );
 }
+
+    

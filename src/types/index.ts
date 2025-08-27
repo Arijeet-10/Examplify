@@ -1,4 +1,5 @@
 
+
 export type GeneratedQuestion = {
     id: string; // Can be from Firestore or a temporary client-side ID
     question: string;
@@ -25,3 +26,20 @@ export type Student = {
     status: 'Active' | 'Inactive';
     joined: string;
 };
+
+export type Submission = {
+    id: string;
+    examId: string;
+    studentId: string;
+    studentName: string;
+    submittedAt: {
+        seconds: number;
+        nanoseconds: number;
+    };
+    answers: { [key: string]: string };
+    score: number;
+    totalAutoGraded: number;
+    totalQuestions: number;
+};
+
+    

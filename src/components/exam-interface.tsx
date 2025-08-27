@@ -3,8 +3,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { doc, getDoc, collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { db, auth } from "@/lib/firebase";
 import {
   Card,
   CardContent,
@@ -28,47 +29,58 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Exam, GeneratedQuestion as Question } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
-
-const EXAM_DURATION = 15 * 60; // 15 minutes in seconds
 
 export function ExamInterface({ examId }: { examId: string }) {
   const router = useRouter();
+  const { toast } = useToast();
+  const [user, authLoading] = useAuthState(auth);
+  
   const [exam, setExam] = useState<Exam | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
-  const [timeLeft, setTimeLeft] = useState(EXAM_DURATION);
+  const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+        router.push('/');
+        return;
+    }
+
     const fetchExamData = async () => {
       setIsLoading(true);
       try {
-        // Fetch exam details
         const examDocRef = doc(db, "exams", examId);
         const examSnapshot = await getDoc(examDocRef);
 
-        if (!examSnapshot.exists()) {
-          throw new Error("Exam not found.");
+        if (!examSnapshot.exists() || examSnapshot.data().status === 'Draft') {
+          throw new Error("Exam not found or not available.");
         }
         
         const examData = examSnapshot.data() as Omit<Exam, 'id'>;
         setExam({ id: examSnapshot.id, ...examData });
         setTimeLeft(examData.duration * 60);
 
-        // Fetch questions
         const questionsColRef = collection(db, "exams", examId, "questions");
         const questionsSnapshot = await getDocs(questionsColRef);
         const fetchedQuestions = questionsSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Question[];
+
+        if (fetchedQuestions.length === 0) {
+            throw new Error("This exam has no questions.");
+        }
 
         setQuestions(fetchedQuestions);
 
@@ -81,14 +93,13 @@ export function ExamInterface({ examId }: { examId: string }) {
     };
 
     fetchExamData();
-  }, [examId]);
+  }, [examId, user, authLoading, router]);
 
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading || isSubmitting) return;
 
     if (timeLeft <= 0) {
-      // Auto-submit logic
       handleSubmit();
       return;
     }
@@ -98,7 +109,7 @@ export function ExamInterface({ examId }: { examId: string }) {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [timeLeft, isLoading, router]);
+  }, [timeLeft, isLoading, isSubmitting]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -113,15 +124,57 @@ export function ExamInterface({ examId }: { examId: string }) {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
   
-  const handleSubmit = () => {
-    // In a real app, you would send answers to the server here.
-    console.log("Submitting answers:", answers);
-    router.push("/student/dashboard?status=submitted");
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    let score = 0;
+    let autoGradedCount = 0;
+
+    questions.forEach(q => {
+        if (q.type === 'mcq') {
+            autoGradedCount++;
+            if (answers[q.id] === q.answer) {
+                score++;
+            }
+        }
+    });
+
+    try {
+        if (!user) throw new Error("User not authenticated.");
+
+        const submissionData = {
+            examId: examId,
+            studentId: user.uid,
+            studentName: user.displayName || user.email || "Anonymous", // Get student name if available
+            submittedAt: serverTimestamp(),
+            answers,
+            score,
+            totalAutoGraded: autoGradedCount,
+            totalQuestions: questions.length,
+        };
+
+        await addDoc(collection(db, "submissions"), submissionData);
+
+        toast({
+            title: "Exam Submitted!",
+            description: "Your answers have been recorded. Good luck!",
+        });
+        router.push("/student/dashboard?status=submitted");
+
+    } catch (error: any) {
+         toast({
+            variant: "destructive",
+            title: "Submission Failed",
+            description: error.message || "An error occurred while submitting. Please try again.",
+        });
+        setIsSubmitting(false);
+    }
   };
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
-        <div className="flex flex-col items-center justify-center p-4 md:p-6 min-h-full">
+        <div className="flex flex-col items-center justify-center p-4 md:p-6 min-h-[calc(100vh-4rem)]">
             <Card className="w-full max-w-4xl shadow-lg">
                 <CardHeader>
                     <Skeleton className="h-8 w-3/4" />
@@ -147,7 +200,7 @@ export function ExamInterface({ examId }: { examId: string }) {
 
   if (error) {
       return (
-          <div className="flex items-center justify-center min-h-full">
+          <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
               <Card className="w-full max-w-md text-center p-8">
                   <AlertCircle className="mx-auto h-12 w-12 text-destructive" />
                   <h2 className="mt-4 text-2xl font-bold">An Error Occurred</h2>
@@ -159,7 +212,16 @@ export function ExamInterface({ examId }: { examId: string }) {
   }
 
   if (!exam || questions.length === 0) {
-      return <div>No questions found for this exam.</div>
+      return (
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+              <Card className="w-full max-w-md text-center p-8">
+                  <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <h2 className="mt-4 text-2xl font-bold">No Questions Found</h2>
+                  <p className="mt-2 text-muted-foreground">This exam does not have any questions yet.</p>
+                  <Button onClick={() => router.push('/student/dashboard')} className="mt-6">Go to Dashboard</Button>
+              </Card>
+          </div>
+      )
   }
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -182,7 +244,9 @@ export function ExamInterface({ examId }: { examId: string }) {
              </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">Submit Exam</Button>
+                <Button variant="destructive" disabled={isSubmitting}>
+                    {isSubmitting ? <Loader2 className="animate-spin" /> : "Submit Exam"}
+                </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -193,8 +257,8 @@ export function ExamInterface({ examId }: { examId: string }) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSubmit}>
-                    Confirm Submission
+                  <AlertDialogAction onClick={handleSubmit} disabled={isSubmitting}>
+                    {isSubmitting ? "Submitting..." : "Confirm Submission"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -215,10 +279,10 @@ export function ExamInterface({ examId }: { examId: string }) {
                   value={answers[currentQuestion.id] || ""}
                   className="space-y-2"
                 >
-                  {currentQuestion.options.map((option) => (
-                    <div key={option} className="flex items-center space-x-2">
-                      <RadioGroupItem value={option} id={`${currentQuestion.id}-${option}`} />
-                      <Label htmlFor={`${currentQuestion.id}-${option}`} className="font-normal text-base">{option}</Label>
+                  {currentQuestion.options.map((option, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <RadioGroupItem value={option} id={`${currentQuestion.id}-${index}`} />
+                      <Label htmlFor={`${currentQuestion.id}-${index}`} className="font-normal text-base">{option}</Label>
                     </div>
                   ))}
                 </RadioGroup>
@@ -257,3 +321,5 @@ export function ExamInterface({ examId }: { examId: string }) {
     </div>
   );
 }
+
+    
