@@ -3,6 +3,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpenCheck } from "lucide-react";
 import Link from "next/link";
+import { Separator } from "@/components/ui/separator";
 
 export default function Home() {
   return (
@@ -75,6 +77,15 @@ export default function Home() {
                 </form>
               </TabsContent>
             </CardContent>
+            <CardFooter className="flex-col items-center gap-4">
+                <Separator />
+                 <div className="text-sm">
+                  Don't have an account?{" "}
+                  <Link href="/signup" className="font-semibold text-primary underline">
+                    Sign up
+                  </Link>
+                </div>
+            </CardFooter>
           </Card>
         </Tabs>
       </div>
