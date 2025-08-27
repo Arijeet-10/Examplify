@@ -9,7 +9,7 @@ export type GeneratedQuestion = {
 };
 
 export type Exam = {
-    id: string;
+    id:string;
     title: string;
     description: string;
     duration: number;
@@ -42,4 +42,7 @@ export type Submission = {
     totalQuestions: number;
 };
 
+export type QuestionWithStudentAnswer = GeneratedQuestion & {
+    studentAnswer: string;
+};
     

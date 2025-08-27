@@ -130,8 +130,10 @@ export default function GradingPage({ params: { id } }: { params: { id: string }
                             {format(new Date(submission.submittedAt.seconds * 1000), "PPP p")}
                         </TableCell>
                         <TableCell>
-                            <Button variant="outline" size="sm" disabled>
-                                View Details
+                            <Button asChild variant="outline" size="sm">
+                                <Link href={`/admin/submissions/${submission.id}`}>
+                                 View Details
+                                </Link>
                             </Button>
                         </TableCell>
                         </TableRow>
@@ -145,5 +147,3 @@ export default function GradingPage({ params: { id } }: { params: { id: string }
     </div>
   );
 }
-
-    
