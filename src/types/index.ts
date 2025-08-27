@@ -14,7 +14,7 @@ export type Exam = {
     duration: number;
     date: string;
     status: 'Draft' | 'Published' | 'Ongoing' | 'Completed';
-    questionCount?: number;
+    questionCount: number;
 };
 
 export type Student = {
