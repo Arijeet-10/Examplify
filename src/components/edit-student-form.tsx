@@ -1,7 +1,6 @@
 
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -30,6 +29,11 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   studentId: z.string().min(1, { message: "Student ID cannot be empty." }),
   status: z.enum(["Active", "Inactive"]),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional().or(z.literal('')),
+  confirmPassword: z.string().optional(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 type EditStudentFormProps = {
@@ -45,6 +49,8 @@ export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFor
       name: student.name,
       studentId: student.studentId,
       status: student.status,
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -103,6 +109,39 @@ export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFor
             </FormItem>
           )}
         />
+
+        <div className="space-y-2 pt-4 border-t">
+            <p className="text-sm font-medium">Reset Password</p>
+            <p className="text-xs text-muted-foreground">Leave these fields blank to keep the current password.</p>
+        </div>
+
+         <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="••••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+         <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm New Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="••••••••" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isLoading ? "Saving Changes..." : "Save Changes"}
