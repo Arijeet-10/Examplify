@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
+import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import {
@@ -136,7 +137,9 @@ export default function StudentsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                         <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                         <Link href={`/admin/students/edit/${student.id}`}>
+                            <DropdownMenuItem>Edit</DropdownMenuItem>
+                         </Link>
                         <DropdownMenuItem className="text-destructive">
                             Deactivate
                         </DropdownMenuItem>
@@ -152,4 +155,3 @@ export default function StudentsPage() {
     </div>
   );
 }
-
