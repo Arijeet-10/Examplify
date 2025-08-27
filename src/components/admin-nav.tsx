@@ -1,17 +1,16 @@
+
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
   FileText,
   Users,
   BarChart,
 } from "lucide-react";
 
 const navItems = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/exams", label: "Exams", icon: FileText },
   { href: "/admin/students", label: "Students", icon: Users },
   { href: "/admin/monitoring", label: "Monitoring", icon: BarChart },

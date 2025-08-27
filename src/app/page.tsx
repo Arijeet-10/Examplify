@@ -77,7 +77,7 @@ export default function Home() {
     setIsLoading(true);
     try {
       await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
-      router.push("/admin/dashboard");
+      router.push("/admin/exams");
     } catch (error) {
        toast({
         variant: "destructive",
