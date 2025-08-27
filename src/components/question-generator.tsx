@@ -102,7 +102,8 @@ export function QuestionGenerator({ onQuestionsGenerated }: QuestionGeneratorPro
   };
   
   const handleAddQuestions = () => {
-    onQuestionsGenerated(generatedQuestions);
+    const questionsWithTypes = generatedQuestions.map(q => ({ ...q, type: 'descriptive' as const }));
+    onQuestionsGenerated(questionsWithTypes);
     setGeneratedQuestions([]); // Clear after adding
   }
 
