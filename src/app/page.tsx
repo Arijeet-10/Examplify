@@ -150,15 +150,6 @@ export default function Home() {
                 </form>
               </TabsContent>
             </CardContent>
-            <CardFooter className="flex-col items-center gap-4">
-                <Separator />
-                 <div className="text-sm">
-                  Don't have an account?{" "}
-                  <Link href="/signup" className="font-semibold text-primary underline">
-                    Sign up
-                  </Link>
-                </div>
-            </CardFooter>
           </Card>
         </Tabs>
       </div>
