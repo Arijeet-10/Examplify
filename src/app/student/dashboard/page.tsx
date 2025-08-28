@@ -4,7 +4,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { collection, query, where, onSnapshot, getDocs } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { db, auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,23 +15,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Clock, HelpCircle } from "lucide-react";
-import type { Exam } from "@/types";
+import { Clock, HelpCircle, CheckCircle } from "lucide-react";
+import type { Exam, Submission } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function StudentDashboard() {
+  const [user] = useAuthState(auth);
   const [exams, setExams] = useState<Exam[]>([]);
+  const [submissions, setSubmissions] = useState<string[]>([]); // list of submitted exam IDs
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Fetch submitted exam IDs
+    const submissionsQuery = query(collection(db, "submissions"), where("studentId", "==", user.uid));
+    const unsubscribeSubmissions = onSnapshot(submissionsQuery, (snapshot) => {
+        const submittedExamIds = snapshot.docs.map(doc => doc.data().examId as string);
+        setSubmissions(submittedExamIds);
+    });
+
     // Only fetch exams that are 'Published' or 'Ongoing'
     const examsQuery = query(collection(db, "exams"), where("status", "in", ["Published", "Ongoing"]));
-
-    const unsubscribe = onSnapshot(examsQuery, async (snapshot) => {
+    const unsubscribeExams = onSnapshot(examsQuery, async (snapshot) => {
       const examListPromises = snapshot.docs.map(async (doc) => {
         const data = doc.data();
-        // To get the question count, we need to query the subcollection.
-        // This is a separate read operation for each exam.
         const questionsSnapshot = await getDocs(collection(db, "exams", doc.id, "questions"));
         return {
           id: doc.id,
@@ -39,7 +51,7 @@ export default function StudentDashboard() {
           duration: data.duration,
           date: data.date,
           status: data.status,
-          questionCount: questionsSnapshot.size, // Get the count of questions
+          questionCount: questionsSnapshot.size,
         } as Exam;
       });
 
@@ -48,9 +60,12 @@ export default function StudentDashboard() {
       setIsLoading(false);
     });
 
-    // Clean up the listener when the component unmounts
-    return () => unsubscribe();
-  }, []);
+    // Clean up listeners
+    return () => {
+      unsubscribeSubmissions();
+      unsubscribeExams();
+    };
+  }, [user]);
 
   return (
     <div className="container py-8">
@@ -84,31 +99,41 @@ export default function StudentDashboard() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {exams.map((exam) => (
-            <Card key={exam.id} className="flex flex-col">
-              <CardHeader>
-                <CardTitle className="font-headline">{exam.title}</CardTitle>
-                <CardDescription>{exam.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-grow space-y-4">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Clock className="mr-2 h-4 w-4" />
-                  <span>{exam.duration} minutes</span>
-                </div>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <HelpCircle className="mr-2 h-4 w-4" />
-                  <span>{exam.questionCount || 0} questions</span>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Link href={`/student/exam/${exam.id}`} className="w-full">
-                  <Button className="w-full bg-accent hover:bg-accent/90">
-                    Start Exam
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
+          {exams.map((exam) => {
+            const hasTaken = submissions.includes(exam.id);
+            return (
+                <Card key={exam.id} className="flex flex-col">
+                <CardHeader>
+                    <CardTitle className="font-headline">{exam.title}</CardTitle>
+                    <CardDescription>{exam.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex-grow space-y-4">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                    <Clock className="mr-2 h-4 w-4" />
+                    <span>{exam.duration} minutes</span>
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    <span>{exam.questionCount || 0} questions</span>
+                    </div>
+                </CardContent>
+                <CardFooter>
+                    {hasTaken ? (
+                        <Button disabled className="w-full">
+                           <CheckCircle className="mr-2 h-4 w-4" />
+                           Completed
+                        </Button>
+                    ) : (
+                        <Link href={`/student/exam/${exam.id}`} className="w-full">
+                            <Button className="w-full bg-accent hover:bg-accent/90">
+                                Start Exam
+                            </Button>
+                        </Link>
+                    )}
+                </CardFooter>
+                </Card>
+            )
+          })}
         </div>
       )}
     </div>

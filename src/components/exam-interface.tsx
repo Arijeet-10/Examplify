@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, addDoc, serverTimestamp, query, where } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -60,6 +60,18 @@ export function ExamInterface({ examId }: { examId: string }) {
     const fetchExamData = async () => {
       setIsLoading(true);
       try {
+        // First, check if the student has already submitted this exam
+        const submissionQuery = query(
+          collection(db, "submissions"),
+          where("examId", "==", examId),
+          where("studentId", "==", user.uid)
+        );
+        const submissionSnapshot = await getDocs(submissionQuery);
+
+        if (!submissionSnapshot.empty) {
+          throw new Error("You have already completed this exam. Please wait for the results. Good luck!");
+        }
+
         const examDocRef = doc(db, "exams", examId);
         const examSnapshot = await getDoc(examDocRef);
 
@@ -109,7 +121,7 @@ export function ExamInterface({ examId }: { examId: string }) {
 
 
   useEffect(() => {
-    if (isLoading || isSubmitting) return;
+    if (isLoading || isSubmitting || error) return;
 
     if (timeLeft <= 0) {
       handleSubmit();
@@ -121,7 +133,8 @@ export function ExamInterface({ examId }: { examId: string }) {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [timeLeft, isLoading, isSubmitting]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, isLoading, isSubmitting, error]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -333,5 +346,3 @@ export function ExamInterface({ examId }: { examId: string }) {
     </div>
   );
 }
-
-    

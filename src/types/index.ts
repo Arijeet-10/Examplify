@@ -17,6 +17,7 @@ export type Exam = {
     status: 'Draft' | 'Published' | 'Ongoing' | 'Completed';
     questionCount?: number; // Make optional as it's not always present on the doc itself
     examId?: string; // for submissions
+    submissions?: Submission[];
 };
 
 export type Student = {
