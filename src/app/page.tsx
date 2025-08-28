@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -30,6 +30,7 @@ import {
   DialogFooter,
   DialogClose
 } from "@/components/ui/dialog";
+import { Captcha } from "@/components/captcha";
 
 
 export default function Home() {
@@ -47,6 +48,9 @@ export default function Home() {
   const [resetAdminId, setResetAdminId] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  
+  const [isStudentCaptchaVerified, setIsStudentCaptchaVerified] = useState(false);
+  const [isAdminCaptchaVerified, setIsAdminCaptchaVerified] = useState(false);
 
 
   const handleStudentLogin = async (e: React.FormEvent) => {
@@ -204,7 +208,11 @@ export default function Home() {
                     <Label htmlFor="student-password">Password</Label>
                     <Input id="student-password" type="password" placeholder="Enter your password" required value={studentPassword} onChange={e => setStudentPassword(e.target.value)} />
                   </div>
-                  <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading && activeTab === 'student'}>
+                   <div className="space-y-2">
+                    <Label>Verification</Label>
+                    <Captcha onVerified={setIsStudentCaptchaVerified} />
+                  </div>
+                  <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading || !isStudentCaptchaVerified}>
                     {isLoading && activeTab === 'student' ? <Loader2 className="animate-spin" /> : "Student Login"}
                   </Button>
                 </form>
@@ -224,6 +232,10 @@ export default function Home() {
                   <div className="space-y-2">
                     <Label htmlFor="admin-password">Password</Label>
                     <Input id="admin-password" type="password" required placeholder="••••••••" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} />
+                  </div>
+                   <div className="space-y-2">
+                    <Label>Verification</Label>
+                    <Captcha onVerified={setIsAdminCaptchaVerified} />
                   </div>
                    <div className="flex items-center justify-end">
                       <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
@@ -262,7 +274,7 @@ export default function Home() {
                           </DialogContent>
                       </Dialog>
                   </div>
-                  <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading && activeTab === 'admin'}>
+                  <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading || !isAdminCaptchaVerified}>
                     {isLoading && activeTab === 'admin' ? <Loader2 className="animate-spin" /> : "Admin Login"}
                   </Button>
                 </form>
