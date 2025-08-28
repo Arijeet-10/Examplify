@@ -172,11 +172,11 @@ export default function ViewStudentPage({ params: { id } }: { params: { id: stri
                         </div>
                          <div className="grid gap-1.5">
                             <p className="font-medium text-muted-foreground">Status</p>
-                            <p>
+                            <div>
                                <Badge variant={student.status === "Active" ? "default" : "secondary"}>
                                  {student.status}
                                </Badge>
-                            </p>
+                            </div>
                         </div>
                         <div className="grid gap-1.5">
                             <p className="font-medium text-muted-foreground">Phone Number</p>
