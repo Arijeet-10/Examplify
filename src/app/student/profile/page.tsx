@@ -191,10 +191,6 @@ export default function StudentProfilePage() {
                             <p className="font-medium text-muted-foreground">Date Joined</p>
                             <p>{format(new Date(student.joined), "PPP")}</p>
                         </div>
-                        <div className="grid gap-1.5">
-                            <p className="font-medium text-muted-foreground">Firebase User ID</p>
-                            <p className="font-mono text-xs">{student.id}</p>
-                        </div>
                     </div>
                 </CardContent>
             </Card>
