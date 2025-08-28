@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -15,9 +15,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Captcha } from "@/components/captcha";
@@ -32,7 +39,6 @@ export default function Home() {
   const [adminUserId, setAdminUserId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("student");
   
   const [isStudentCaptchaVerified, setIsStudentCaptchaVerified] = useState(false);
   const [isAdminCaptchaVerified, setIsAdminCaptchaVerified] = useState(false);
@@ -98,13 +104,50 @@ export default function Home() {
   
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
+    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-background">
+       <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="absolute top-4 right-4">Admin Login</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Admin Login</DialogTitle>
+            <DialogDescription>
+              Enter your administrator credentials to access the dashboard.
+            </DialogDescription>
+          </DialogHeader>
+           <form onSubmit={handleAdminLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="admin-user-id">Admin User ID</Label>
+                <Input
+                  id="admin-user-id"
+                  placeholder="example@mail.com"
+                  required
+                  value={adminUserId}
+                  onChange={e => setAdminUserId(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="admin-password">Password</Label>
+                <Input id="admin-password" type="password" required placeholder="••••••••" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} />
+              </div>
+                <div className="space-y-2">
+                <Label>Verification</Label>
+                <Captcha onVerified={setIsAdminCaptchaVerified} />
+              </div>
+              <Button type="submit" className="w-full mt-2" disabled={isLoading || !isAdminCaptchaVerified}>
+                {isLoading ? <Loader2 className="animate-spin" /> : "Admin Login"}
+              </Button>
+            </form>
+        </DialogContent>
+      </Dialog>
+
+
       <div className="w-full max-w-md">
-        <Tabs defaultValue="student" onValueChange={setActiveTab} className="w-full">
           <Card className="shadow-2xl overflow-hidden">
             <CardHeader className="text-center pt-8">
               <div className="flex justify-center items-center gap-2 mb-2">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
+                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
                   <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
                   <path d="M14.22 8.3C14.53 8.01 14.51 7.5 14.19 7.21C13.88 6.91 13.37 6.94 13.08 7.27L10.23 10.47C9.94 10.8 9.94 11.31 10.24 11.63L13.08 14.73C13.37 15.06 13.88 15.09 14.19 14.79C14.51 14.5 14.53 13.99 14.22 13.7L11.85 11.05L14.22 8.3Z" fill="currentColor"/>
                 </svg>
@@ -112,17 +155,12 @@ export default function Home() {
                   Examplify
                 </h1>
               </div>
-              <CardTitle className="text-2xl font-headline">Welcome Back</CardTitle>
+              <CardTitle className="text-2xl font-headline">Student Portal</CardTitle>
               <CardDescription>
                 Sign in to access your examination panel.
               </CardDescription>
-              <TabsList className="grid w-full grid-cols-2 mt-4">
-                <TabsTrigger value="student">Student</TabsTrigger>
-                <TabsTrigger value="admin">Admin</TabsTrigger>
-              </TabsList>
             </CardHeader>
             <CardContent>
-              <TabsContent value="student">
                 <form onSubmit={handleStudentLogin} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="student-id">Student ID</Label>
@@ -136,39 +174,12 @@ export default function Home() {
                     <Label>Verification</Label>
                     <Captcha onVerified={setIsStudentCaptchaVerified} />
                   </div>
-                  <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading || !isStudentCaptchaVerified}>
-                    {isLoading && activeTab === 'student' ? <Loader2 className="animate-spin" /> : "Student Login"}
+                  <Button type="submit" className="w-full mt-2" disabled={isLoading || !isStudentCaptchaVerified}>
+                    {isLoading ? <Loader2 className="animate-spin" /> : "Student Login"}
                   </Button>
                 </form>
-              </TabsContent>
-              <TabsContent value="admin">
-                <form onSubmit={handleAdminLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-user-id">Admin User ID</Label>
-                    <Input
-                      id="admin-user-id"
-                      placeholder="example@mail.com"
-                      required
-                      value={adminUserId}
-                      onChange={e => setAdminUserId(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="admin-password">Password</Label>
-                    <Input id="admin-password" type="password" required placeholder="••••••••" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} />
-                  </div>
-                   <div className="space-y-2">
-                    <Label>Verification</Label>
-                    <Captcha onVerified={setIsAdminCaptchaVerified} />
-                  </div>
-                  <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading || !isAdminCaptchaVerified}>
-                    {isLoading && activeTab === 'admin' ? <Loader2 className="animate-spin" /> : "Admin Login"}
-                  </Button>
-                </form>
-              </TabsContent>
             </CardContent>
           </Card>
-        </Tabs>
       </div>
     </main>
   );
