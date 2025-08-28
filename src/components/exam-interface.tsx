@@ -82,7 +82,19 @@ export function ExamInterface({ examId }: { examId: string }) {
             throw new Error("This exam has no questions.");
         }
 
-        setQuestions(fetchedQuestions);
+        // Fisher-Yates shuffle algorithm
+        const shuffleArray = (array: Question[]) => {
+          let currentIndex = array.length, randomIndex;
+          while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [
+              array[randomIndex], array[currentIndex]];
+          }
+          return array;
+        }
+
+        setQuestions(shuffleArray(fetchedQuestions));
 
       } catch (err: any) {
         console.error("Error fetching exam data:", err);
