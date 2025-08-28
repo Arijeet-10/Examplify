@@ -20,16 +20,6 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpenCheck, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose
-} from "@/components/ui/dialog";
 import { Captcha } from "@/components/captcha";
 
 
@@ -43,11 +33,6 @@ export default function Home() {
   const [adminPassword, setAdminPassword] = useState("12245");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("student");
-  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
-  
-  const [resetAdminId, setResetAdminId] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
   
   const [isStudentCaptchaVerified, setIsStudentCaptchaVerified] = useState(false);
   const [isAdminCaptchaVerified, setIsAdminCaptchaVerified] = useState(false);
@@ -121,60 +106,6 @@ export default function Home() {
     }
   };
   
-  const handleDirectPasswordReset = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    if (resetAdminId !== '12245') {
-        toast({
-            variant: "destructive",
-            title: "Invalid User ID",
-            description: "The entered Admin User ID is incorrect.",
-        });
-        setIsLoading(false);
-        return;
-    }
-
-    if (!newPassword || newPassword.length < 6) {
-        toast({
-            variant: "destructive",
-            title: "Invalid Password",
-            description: "New password must be at least 6 characters.",
-        });
-        setIsLoading(false);
-        return;
-    }
-
-    if (newPassword !== confirmNewPassword) {
-        toast({
-            variant: "destructive",
-            title: "Passwords Do Not Match",
-            description: "The new password and confirmation do not match.",
-        });
-        setIsLoading(false);
-        return;
-    }
-
-    // In a real application, this is where you would call a secure backend
-    // function to update the password in Firebase Auth.
-    // For this example, we will simulate success.
-    
-    toast({
-        title: "Password Reset (Simulated)",
-        description: "Your password has been successfully updated. You can now log in with your new password.",
-    });
-    
-    // Also update the state for the main login form if they reset it
-    setAdminPassword(newPassword);
-
-    // Reset form and close dialog
-    setResetAdminId("");
-    setNewPassword("");
-    setConfirmNewPassword("");
-    setIsResetDialogOpen(false);
-    setIsLoading(false);
-  };
-
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
@@ -236,43 +167,6 @@ export default function Home() {
                    <div className="space-y-2">
                     <Label>Verification</Label>
                     <Captcha onVerified={setIsAdminCaptchaVerified} />
-                  </div>
-                   <div className="flex items-center justify-end">
-                      <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-                          <DialogTrigger asChild>
-                              <Button type="button" variant="link" size="sm" className="p-0 h-auto">Forgot Password?</Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                              <DialogHeader>
-                                  <DialogTitle>Reset Admin Password</DialogTitle>
-                                  <DialogDescription>
-                                    Enter your Admin User ID and a new password below.
-                                  </DialogDescription>
-                              </DialogHeader>
-                              <form onSubmit={handleDirectPasswordReset} className="space-y-4">
-                                  <div className="space-y-2">
-                                      <Label htmlFor="reset-admin-id">Admin User ID</Label>
-                                      <Input id="reset-admin-id" placeholder="Enter your Admin User ID" required value={resetAdminId} onChange={e => setResetAdminId(e.target.value)} />
-                                  </div>
-                                   <div className="space-y-2">
-                                      <Label htmlFor="new-password">New Password</Label>
-                                      <Input id="new-password" type="password" placeholder="Enter new password" required value={newPassword} onChange={e => setNewPassword(e.target.value)} />
-                                  </div>
-                                   <div className="space-y-2">
-                                      <Label htmlFor="confirm-new-password">Confirm New Password</Label>
-                                      <Input id="confirm-new-password" type="password" placeholder="Confirm new password" required value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} />
-                                  </div>
-                                  <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button type="button" variant="secondary">Cancel</Button>
-                                    </DialogClose>
-                                    <Button type="submit" disabled={isLoading}>
-                                        {isLoading ? <Loader2 className="animate-spin" /> : "Set New Password"}
-                                    </Button>
-                                  </DialogFooter>
-                              </form>
-                          </DialogContent>
-                      </Dialog>
                   </div>
                   <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading || !isAdminCaptchaVerified}>
                     {isLoading && activeTab === 'admin' ? <Loader2 className="animate-spin" /> : "Admin Login"}
