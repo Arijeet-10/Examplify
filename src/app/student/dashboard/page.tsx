@@ -82,7 +82,7 @@ export default function StudentDashboard() {
     };
   }, [user]);
 
-  const availableExams = exams.filter(exam => !submissions.has(exam.id));
+  const visibleExams = exams.filter(exam => exam.status === 'Published' || exam.status === 'Ongoing');
 
   return (
     <div className="container py-8">
@@ -109,7 +109,7 @@ export default function StudentDashboard() {
                 </Card>
             ))}
         </div>
-      ) : exams.length === 0 ? (
+      ) : visibleExams.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center min-h-[400px] border-2 border-dashed rounded-lg p-8 bg-muted/50">
             <Image 
                 src="https://picsum.photos/seed/exams-done/600/400" 
@@ -124,7 +124,7 @@ export default function StudentDashboard() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {exams.map((exam) => {
+          {visibleExams.map((exam) => {
             const hasTaken = submissions.has(exam.id);
             return (
                 <Card key={exam.id} className="flex flex-col">
