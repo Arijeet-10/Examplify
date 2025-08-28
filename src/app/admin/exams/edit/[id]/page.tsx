@@ -14,6 +14,7 @@ import { AlertCircle } from "lucide-react";
 
 
 export default function EditExamPage({ params }: { params: { id: string } }) {
+    const { id } = params;
     const [initialData, setInitialData] = useState<{exam: Exam, questions: GeneratedQuestion[]} | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,7 +26,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
         const fetchExamData = async () => {
             setIsLoading(true);
             try {
-                const examDocRef = doc(db, "exams", params.id);
+                const examDocRef = doc(db, "exams", id);
                 const examSnapshot = await getDoc(examDocRef);
 
                 if (!examSnapshot.exists()) {
@@ -34,7 +35,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
 
                 const examData = { id: examSnapshot.id, ...examSnapshot.data() } as Exam;
 
-                const questionsColRef = collection(db, "exams", params.id, "questions");
+                const questionsColRef = collection(db, "exams", id, "questions");
                 const questionsSnapshot = await getDocs(questionsColRef);
                 const questions = questionsSnapshot.docs.map(doc => ({
                     id: doc.id,
@@ -51,7 +52,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
         };
 
         fetchExamData();
-    }, [params.id]);
+    }, [id]);
 
 
     const handleUpdateExam = async (examData: Omit<Exam, 'id'>, questions: GeneratedQuestion[]) => {
@@ -76,7 +77,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
         setIsSubmitting(true);
 
         try {
-            const examDocRef = doc(db, "exams", params.id);
+            const examDocRef = doc(db, "exams", id);
             
             // Update the main exam document
             await updateDoc(examDocRef, {
@@ -87,7 +88,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
             // For simplicity, we'll overwrite the questions.
             // A more complex implementation might diff changes.
             const batch = writeBatch(db);
-            const questionsColRef = collection(db, "exams", params.id, "questions");
+            const questionsColRef = collection(db, "exams", id, "questions");
 
             // First, delete old questions (optional, but good for cleanup)
             const oldQuestionsSnapshot = await getDocs(questionsColRef);
