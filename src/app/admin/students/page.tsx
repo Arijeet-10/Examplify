@@ -111,7 +111,7 @@ export default function StudentsPage() {
                     <TableCell className="font-medium">
                     <div className="flex items-center gap-3">
                         <Avatar className="h-9 w-9">
-                        <AvatarImage src={`https://picsum.photos/seed/${student.id}/100`} data-ai-hint="person face" />
+                        <AvatarImage src={student.photoURL || `https://picsum.photos/seed/${student.id}/100`} data-ai-hint="person face" />
                         <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="grid gap-0.5">
@@ -136,7 +136,9 @@ export default function StudentsPage() {
                         </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                         <Link href={`/admin/students/view/${student.id}`}>
+                            <DropdownMenuItem>View Details</DropdownMenuItem>
+                         </Link>
                          <Link href={`/admin/students/edit/${student.id}`}>
                             <DropdownMenuItem>Edit</DropdownMenuItem>
                          </Link>

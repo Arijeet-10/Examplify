@@ -25,6 +25,7 @@ export type Student = {
     studentId: string;
     status: 'Active' | 'Inactive';
     joined: string;
+    photoURL?: string;
 };
 
 export type Submission = {
