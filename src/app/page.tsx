@@ -223,7 +223,7 @@ export default function Home() {
                     <Label htmlFor="admin-user-id">Admin User ID</Label>
                     <Input
                       id="admin-user-id"
-                      placeholder="e.g., 12245"
+                      placeholder="example@mail.com"
                       required
                       value={adminUserId}
                       onChange={e => setAdminUserId(e.target.value)}
