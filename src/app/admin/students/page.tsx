@@ -7,7 +7,7 @@ import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, UserPlus, Users } from "lucide-react";
+import { MoreHorizontal, UserPlus, Users, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
