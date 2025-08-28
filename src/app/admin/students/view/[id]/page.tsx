@@ -79,7 +79,7 @@ export default function ViewStudentPage({ params: { id } }: { params: { id: stri
             toast({
                 variant: "destructive",
                 title: "Upload Failed",
-                description: err.message || "An error occurred while uploading the image.",
+                description: err.message || "An error occurred while uploading the image. Check storage rules.",
             });
         } finally {
             setIsUploading(false);
@@ -137,7 +137,7 @@ export default function ViewStudentPage({ params: { id } }: { params: { id: stri
             <Card className="overflow-hidden">
                 <CardHeader className="flex flex-col items-center bg-muted/30 p-8 text-center">
                     <div className="relative group">
-                         <Avatar className="h-32 w-32">
+                         <Avatar className="h-32 w-32 border-4 border-background shadow-md">
                             <AvatarImage src={student.photoURL} alt={student.name} />
                             <AvatarFallback className="text-4xl">
                                 {student.name.split(' ').map(n => n[0]).join('')}
@@ -146,7 +146,7 @@ export default function ViewStudentPage({ params: { id } }: { params: { id: stri
                         <Button
                             variant="outline"
                             size="icon"
-                            className="absolute bottom-2 right-2 rounded-full h-10 w-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute bottom-1 right-1 rounded-full h-10 w-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 backdrop-blur-sm"
                             onClick={handleAvatarClick}
                             disabled={isUploading}
                         >
@@ -184,7 +184,7 @@ export default function ViewStudentPage({ params: { id } }: { params: { id: stri
                         </div>
                         <div className="grid gap-1.5">
                             <p className="font-medium text-muted-foreground">Date Joined</p>
-                            <p>{format(new Date(student.joined), "PPP")}</p>
+                            <p>{student.joined ? format(new Date(student.joined), "PPP") : 'N/A'}</p>
                         </div>
                     </div>
                 </CardContent>
