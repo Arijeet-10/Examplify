@@ -137,13 +137,13 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
                                         value={option} 
                                         onChange={(e) => handleOptionChange(index, e.target.value)}
                                     />
-                                    <Button variant="ghost" size="icon" onClick={() => handleRemoveOption(index)}>
+                                    <Button variant="ghost" size="icon" type="button" onClick={() => handleRemoveOption(index)}>
                                         <Trash2 className="w-4 h-4 text-destructive" />
                                     </Button>
                                 </div>
                             ))}
                         </RadioGroup>
-                        <Button variant="outline" size="sm" onClick={handleAddOption}><Plus className="mr-2 h-4 w-4" /> Add Option</Button>
+                        <Button variant="outline" size="sm" type="button" onClick={handleAddOption}><Plus className="mr-2 h-4 w-4" /> Add Option</Button>
                     </div>
                 ) : (
                      <div className="space-y-2">
@@ -152,7 +152,7 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
                     </div>
                 )}
 
-                <Button onClick={handleAddQuestion}><Plus className="mr-2 h-4 w-4" /> Add Question to Exam</Button>
+                <Button type="button" onClick={handleAddQuestion}><Plus className="mr-2 h-4 w-4" /> Add Question to Exam</Button>
             </CardContent>
         </Card>
     );
@@ -279,7 +279,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
                            <AccordionItem key={q.id} value={`item-${index}`}>
                                 <div className="flex items-center justify-between pr-4">
                                   <AccordionTrigger className="text-left flex-1">{`Question ${index + 1}: ${q.question}`}</AccordionTrigger>
-                                   <Button variant="ghost" size="icon" onClick={() => removeQuestion(q.id)}>
+                                   <Button variant="ghost" size="icon" type="button" onClick={() => removeQuestion(q.id)}>
                                         <X className="w-4 h-4 text-destructive" />
                                    </Button>
                                 </div>
