@@ -35,7 +35,7 @@ export function StudentHeader() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Student Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <Link href="/student/dashboard">
+              <Link href="/student/profile">
                 <DropdownMenuItem>
                   <User className="mr-2 h-4 w-4" />
                   <span>My Profile</span>
