@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import {
   Card,
   CardContent,
@@ -15,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import type { GeneratedQuestion, Exam } from "@/types";
+import type { GeneratedQuestion, Exam, Student } from "@/types";
 import {
   Accordion,
   AccordionContent,
@@ -23,7 +25,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Wand, X } from "lucide-react";
+import { Plus, Trash2, Wand, X, Users, Loader2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -32,6 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "./ui/checkbox";
+import { ScrollArea } from "./ui/scroll-area";
 
 
 function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question: GeneratedQuestion) => void }) {
@@ -158,6 +162,85 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
     );
 }
 
+function AssignStudents({ selectedStudents, onSelectionChange }: { selectedStudents: string[], onSelectionChange: (ids: string[]) => void }) {
+    const [allStudents, setAllStudents] = useState<Student[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            setIsLoading(true);
+            const studentsQuery = query(collection(db, "students"), where("status", "==", "Active"));
+            const snapshot = await getDocs(studentsQuery);
+            const studentList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
+            setAllStudents(studentList);
+            setIsLoading(false);
+        };
+        fetchStudents();
+    }, []);
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            onSelectionChange(allStudents.map(s => s.id));
+        } else {
+            onSelectionChange([]);
+        }
+    };
+
+    const handleStudentSelect = (studentId: string, checked: boolean) => {
+        if (checked) {
+            onSelectionChange([...selectedStudents, studentId]);
+        } else {
+            onSelectionChange(selectedStudents.filter(id => id !== studentId));
+        }
+    };
+
+    const areAllSelected = allStudents.length > 0 && selectedStudents.length === allStudents.length;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5"/>Assign Students</CardTitle>
+                <CardDescription>Select which students are assigned to take this exam.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {isLoading ? (
+                    <div className="flex items-center justify-center h-40">
+                        <Loader2 className="animate-spin text-primary"/>
+                    </div>
+                ) : allStudents.length === 0 ? (
+                    <p className="text-muted-foreground text-center">No active students found.</p>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="flex items-center space-x-2">
+                           <Checkbox
+                                id="select-all"
+                                checked={areAllSelected}
+                                onCheckedChange={handleSelectAll}
+                            />
+                            <Label htmlFor="select-all" className="font-bold">Select All Students</Label>
+                        </div>
+                        <ScrollArea className="h-60 w-full rounded-md border p-4">
+                           <div className="space-y-2">
+                                {allStudents.map(student => (
+                                    <div key={student.id} className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id={student.id}
+                                            checked={selectedStudents.includes(student.id)}
+                                            onCheckedChange={(checked) => handleStudentSelect(student.id, !!checked)}
+                                        />
+                                        <Label htmlFor={student.id} className="font-normal flex-1">
+                                            {student.name} <span className="text-muted-foreground">({student.studentId})</span>
+                                        </Label>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
 
 interface ExamFormProps {
     mode: 'create' | 'edit';
@@ -173,6 +256,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
   const [date, setDate] = useState("");
   const [status, setStatus] = useState<Exam['status']>('Draft');
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
+  const [assignedStudentIds, setAssignedStudentIds] = useState<string[]>([]);
   
   const router = useRouter();
   const { toast } = useToast();
@@ -185,6 +269,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
         setDate(initialData.exam.date);
         setStatus(initialData.exam.status);
         setQuestions(initialData.questions);
+        setAssignedStudentIds(initialData.exam.assignedStudentIds || []);
     }
   }, [mode, initialData])
 
@@ -198,7 +283,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
       });
       return;
     }
-    const examData = { title, description, duration: Number(duration), date, status };
+    const examData = { title, description, duration: Number(duration), date, status, assignedStudentIds };
     onSubmit(examData, questions);
   }
 
@@ -264,6 +349,8 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
           </div>
         </CardContent>
       </Card>
+      
+      <AssignStudents selectedStudents={assignedStudentIds} onSelectionChange={setAssignedStudentIds} />
       
       <ManualQuestionCreator onQuestionAdded={addQuestionToExam} />
 

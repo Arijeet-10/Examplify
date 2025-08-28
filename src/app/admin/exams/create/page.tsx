@@ -23,6 +23,15 @@ export default function CreateExamPage() {
       });
       return;
     }
+    
+    if (!examData.assignedStudentIds || examData.assignedStudentIds.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Students Assigned",
+        description: "Please assign at least one student to the exam.",
+      });
+      return;
+    }
 
     setIsLoading(true);
 

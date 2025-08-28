@@ -53,19 +53,19 @@ export default function StudentDashboard() {
         setSubmissions(submittedExamsMap);
     });
 
-    // Only fetch exams that are 'Published' or 'Ongoing'
-    const examsQuery = query(collection(db, "exams"), where("status", "in", ["Published", "Ongoing"]));
+    // Fetch exams that are 'Published' or 'Ongoing' AND assigned to the student
+    const examsQuery = query(
+      collection(db, "exams"), 
+      where("status", "in", ["Published", "Ongoing"]),
+      where("assignedStudentIds", "array-contains", user.uid)
+    );
     const unsubscribeExams = onSnapshot(examsQuery, async (snapshot) => {
       const examListPromises = snapshot.docs.map(async (doc) => {
         const data = doc.data();
         const questionsSnapshot = await getDocs(collection(db, "exams", doc.id, "questions"));
         return {
           id: doc.id,
-          title: data.title,
-          description: data.description,
-          duration: data.duration,
-          date: data.date,
-          status: data.status,
+          ...data,
           questionCount: questionsSnapshot.size,
         } as Exam;
       });
