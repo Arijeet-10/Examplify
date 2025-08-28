@@ -16,6 +16,7 @@ export type Exam = {
     date: string;
     status: 'Draft' | 'Published' | 'Ongoing' | 'Completed';
     questionCount?: number; // Make optional as it's not always present on the doc itself
+    examId?: string; // for submissions
 };
 
 export type Student = {
@@ -46,4 +47,3 @@ export type Submission = {
 export type QuestionWithStudentAnswer = GeneratedQuestion & {
     studentAnswer: string;
 };
-    
