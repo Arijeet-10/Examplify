@@ -104,7 +104,17 @@ export default function Home() {
   
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 bg-background">
+    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 overflow-hidden">
+        <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute top-0 left-0 w-full h-full object-cover -z-10 brightness-50"
+        >
+            <source src="https://firebasestorage.googleapis.com/v0/b/builder-8b594.appspot.com/o/videos%2Flogin-bg.mp4?alt=media&token=c157ac65-3882-485a-939e-399a2d8e4822" type="video/mp4" />
+            Your browser does not support the video tag.
+        </video>
        <Dialog>
         <DialogTrigger asChild>
           <Button variant="outline" className="absolute top-4 right-4">Admin Login</Button>
@@ -144,7 +154,7 @@ export default function Home() {
 
 
       <div className="w-full max-w-md">
-          <Card className="shadow-2xl overflow-hidden">
+          <Card className="shadow-2xl overflow-hidden bg-white/80 dark:bg-black/80 backdrop-blur-sm">
             <CardHeader className="text-center pt-8">
               <div className="flex justify-center items-center gap-2 mb-2">
                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
