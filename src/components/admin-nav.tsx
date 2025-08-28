@@ -22,8 +22,8 @@ export function AdminNav({ isMobile = false }: { isMobile?: boolean }) {
   return (
     <nav
       className={cn(
-        "flex items-center space-x-4 lg:space-x-6",
-        isMobile && "flex-col space-x-0 space-y-2 items-start"
+        "flex items-center space-x-2 lg:space-x-4",
+        isMobile && "flex-col space-x-0 space-y-1 items-stretch"
       )}
     >
       {navItems.map((item) => (
@@ -31,11 +31,11 @@ export function AdminNav({ isMobile = false }: { isMobile?: boolean }) {
           key={item.href}
           href={item.href}
           className={cn(
-            "text-sm font-medium transition-colors hover:text-primary",
+            "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
             pathname.startsWith(item.href)
-              ? "text-primary"
+              ? "bg-accent text-accent-foreground"
               : "text-muted-foreground",
-             isMobile && "flex items-center gap-2 p-2 rounded-md w-full"
+             isMobile && "w-full justify-start"
           )}
         >
           <item.icon className="h-4 w-4" />
