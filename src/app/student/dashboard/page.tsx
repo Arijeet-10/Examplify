@@ -24,7 +24,7 @@ export default function StudentDashboard() {
   const [user] = useAuthState(auth);
   const [studentName, setStudentName] = useState("");
   const [exams, setExams] = useState<Exam[]>([]);
-  const [submissions, setSubmissions] = useState<string[]>([]); // list of submitted exam IDs
+  const [submissions, setSubmissions] = useState<Map<string, Submission>>(new Map()); // map of examId to submission
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -45,8 +45,12 @@ export default function StudentDashboard() {
     // Fetch submitted exam IDs
     const submissionsQuery = query(collection(db, "submissions"), where("studentId", "==", user.uid));
     const unsubscribeSubmissions = onSnapshot(submissionsQuery, (snapshot) => {
-        const submittedExamIds = snapshot.docs.map(doc => doc.data().examId as string);
-        setSubmissions(submittedExamIds);
+        const submittedExamsMap = new Map<string, Submission>();
+        snapshot.docs.forEach(doc => {
+            const submission = doc.data() as Submission;
+            submittedExamsMap.set(submission.examId, submission);
+        });
+        setSubmissions(submittedExamsMap);
     });
 
     // Only fetch exams that are 'Published' or 'Ongoing'
@@ -78,6 +82,8 @@ export default function StudentDashboard() {
     };
   }, [user]);
 
+  const availableExams = exams.filter(exam => !submissions.has(exam.id));
+
   return (
     <div className="container py-8">
       <div className="mb-8">
@@ -103,7 +109,7 @@ export default function StudentDashboard() {
                 </Card>
             ))}
         </div>
-      ) : exams.length === 0 ? (
+      ) : availableExams.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center min-h-[400px] border-2 border-dashed rounded-lg p-8 bg-muted/50">
             <Image 
                 src="https://picsum.photos/seed/exams-done/600/400" 
@@ -113,13 +119,13 @@ export default function StudentDashboard() {
                 className="max-w-sm rounded-lg mb-6 object-cover"
                 data-ai-hint="abstract illustration"
             />
-            <h3 className="text-xl font-semibold">No Exams Available</h3>
-            <p className="text-muted-foreground">There are currently no published exams for you to take. Check back later!</p>
+            <h3 className="text-xl font-semibold">No New Exams Available</h3>
+            <p className="text-muted-foreground">You have completed all available exams. Check back later!</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {exams.map((exam) => {
-            const hasTaken = submissions.includes(exam.id);
+          {availableExams.map((exam) => {
+            const hasTaken = submissions.has(exam.id);
             return (
                 <Card key={exam.id} className="flex flex-col">
                 <CardHeader>
