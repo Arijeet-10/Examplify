@@ -42,7 +42,7 @@ export default function StudentDashboard() {
     };
     fetchStudentData();
 
-    // Fetch submitted exam IDs
+    // Fetch submitted exam IDs to determine which exams are completed
     const submissionsQuery = query(collection(db, "submissions"), where("studentId", "==", user.uid));
     const unsubscribeSubmissions = onSnapshot(submissionsQuery, (snapshot) => {
         const submittedExamsMap = new Map<string, Submission>();
@@ -109,7 +109,7 @@ export default function StudentDashboard() {
                 </Card>
             ))}
         </div>
-      ) : availableExams.length === 0 ? (
+      ) : exams.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center min-h-[400px] border-2 border-dashed rounded-lg p-8 bg-muted/50">
             <Image 
                 src="https://picsum.photos/seed/exams-done/600/400" 
@@ -120,11 +120,11 @@ export default function StudentDashboard() {
                 data-ai-hint="abstract illustration"
             />
             <h3 className="text-xl font-semibold">No New Exams Available</h3>
-            <p className="text-muted-foreground">You have completed all available exams. Check back later!</p>
+            <p className="text-muted-foreground">There are currently no exams for you to take. Check back later!</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {availableExams.map((exam) => {
+          {exams.map((exam) => {
             const hasTaken = submissions.has(exam.id);
             return (
                 <Card key={exam.id} className="flex flex-col">
