@@ -14,11 +14,13 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, Download } from "lucide-react";
 import type { Submission, Exam } from "@/types";
 import { format } from "date-fns";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export default function GradingPage({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -63,14 +65,42 @@ export default function GradingPage({ params }: { params: { id: string } }) {
     }
   }, [id]);
 
+  const handleDownloadPdf = () => {
+    if (!exam || submissions.length === 0) return;
+
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.text(`Submissions for: ${exam.title}`, 14, 22);
+
+    // Add table
+    (doc as any).autoTable({
+      startY: 30,
+      head: [['Student Name', 'Score', 'Submitted On']],
+      body: submissions.map(sub => [
+        sub.studentName,
+        `${sub.score} / ${sub.totalAutoGraded}`,
+        format(new Date(sub.submittedAt.seconds * 1000), "PPP p")
+      ]),
+    });
+
+    doc.save(`submissions-${exam.id}.pdf`);
+  };
+
+
   return (
     <div className="p-4 md:p-8">
-        <div className="mb-6">
+        <div className="flex justify-between items-center mb-6">
             <Button asChild variant="outline" size="sm">
                 <Link href="/admin/exams">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to All Exams
                 </Link>
+            </Button>
+            <Button onClick={handleDownloadPdf} disabled={isLoading || submissions.length === 0}>
+                <Download className="mr-2 h-4 w-4" />
+                Download as PDF
             </Button>
         </div>
 
