@@ -73,7 +73,7 @@ export default function Home() {
 
       // 3. Sign in with email and password
       await signInWithEmailAndPassword(auth, studentEmail, studentPassword);
-      router.push("/student/dashboard");
+      router.push("/student/instructions");
 
     } catch (error: any) {
       console.error("Student login error:", error);
