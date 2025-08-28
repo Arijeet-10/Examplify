@@ -20,12 +20,13 @@ type CaptchaChar = {
 export function Captcha({ onVerified }: CaptchaProps) {
     const [captcha, setCaptcha] = useState<CaptchaChar[]>([]);
     const [userInput, setUserInput] = useState('');
-    const [isClient, setIsClient] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
-    const generateCaptcha = (length = 6): CaptchaChar[] => {
+    // This function now only runs on the client, inside useEffect
+    const generateAndSetCaptcha = () => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result: CaptchaChar[] = [];
-        for (let i = 0; i < length; i++) {
+        for (let i = 0; i < 6; i++) {
             const char = chars.charAt(Math.floor(Math.random() * chars.length));
             const style: React.CSSProperties = {
                 transform: `rotate(${Math.random() * 20 - 10}deg) translateY(${Math.random() * 6 - 3}px)`,
@@ -39,42 +40,51 @@ export function Captcha({ onVerified }: CaptchaProps) {
             };
             result.push({ char, style });
         }
-        return result;
+        setCaptcha(result);
     };
-    
-    // Ensure captcha generation only runs on the client
+
     useEffect(() => {
-        setIsClient(true);
-        setCaptcha(generateCaptcha());
+        setIsMounted(true);
+        generateAndSetCaptcha();
     }, []);
 
     useEffect(() => {
+        if (!isMounted) return;
         const captchaText = captcha.map(c => c.char).join('');
-        if (userInput.toLowerCase() === captchaText.toLowerCase() && captchaText) {
-            onVerified(true);
-        } else {
-            onVerified(false);
-        }
-    }, [userInput, captcha, onVerified]);
+        onVerified(userInput.toLowerCase() === captchaText.toLowerCase() && !!captchaText);
+    }, [userInput, captcha, onVerified, isMounted]);
 
     const handleRefresh = () => {
-        setCaptcha(generateCaptcha());
+        generateAndSetCaptcha();
         setUserInput('');
     };
-    
+
     const captchaText = captcha.map(c => c.char).join('');
+    
+    // Don't render the captcha UI until the component is mounted on the client
+    if (!isMounted) {
+        return (
+             <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                    <Skeleton className="h-16 flex-1" />
+                    <Button variant="outline" size="icon" type="button" disabled>
+                        <RefreshCw className="w-4 h-4" />
+                    </Button>
+                </div>
+                <Skeleton className="h-10 w-full" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-2">
             <div className="flex items-center gap-2">
                 <div className="flex-1 flex items-center justify-center p-2 rounded-md bg-muted border h-16">
-                   {isClient ? captcha.map((c, index) => (
+                   {captcha.map((c, index) => (
                         <span key={index} style={c.style}>
                             {c.char}
                         </span>
-                    )) : (
-                        <Skeleton className="w-32 h-8" />
-                    )}
+                    ))}
                 </div>
                 <Button variant="outline" size="icon" type="button" onClick={handleRefresh}>
                     <RefreshCw className="w-4 h-4" />
