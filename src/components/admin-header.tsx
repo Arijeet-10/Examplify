@@ -16,8 +16,16 @@ import Link from "next/link";
 import { AdminNav } from "./admin-nav";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { PanelLeft } from "lucide-react";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@/lib/firebase";
 
 export function AdminHeader() {
+  const [user] = useAuthState(auth);
+
+  const handleLogout = () => {
+    auth.signOut();
+  }
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur-sm px-4 md:px-6">
       <Link
@@ -63,7 +71,7 @@ export function AdminHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar>
-                <AvatarImage src="https://picsum.photos/seed/admin-avatar/100" alt="Admin" data-ai-hint="person face" />
+                <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/100`} alt="Admin" data-ai-hint="person face" />
                 <AvatarFallback>A</AvatarFallback>
               </Avatar>
             </Button>
@@ -71,19 +79,19 @@ export function AdminHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <Link href="/admin/students">
+            <Link href="/admin/profile">
                 <DropdownMenuItem>
                 <User className="mr-2 h-4 w-4" />
                 <span>Profile</span>
                 </DropdownMenuItem>
             </Link>
             <DropdownMenuSeparator />
-            <Link href="/">
-              <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+              <Link href="/" className="flex items-center w-full">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
-              </DropdownMenuItem>
-            </Link>
+              </Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
