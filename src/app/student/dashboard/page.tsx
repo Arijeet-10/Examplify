@@ -82,7 +82,19 @@ export default function StudentDashboard() {
     };
   }, [user]);
 
-  const visibleExams = exams.filter(exam => exam.status === 'Published' || exam.status === 'Ongoing');
+  const visibleExams = exams.filter(exam => {
+    const submission = submissions.get(exam.id);
+
+    if (submission) {
+      // If submitted, check if it was within the last 24 hours
+      const submissionTime = new Date(submission.submittedAt.seconds * 1000);
+      const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      return submissionTime > twentyFourHoursAgo;
+    }
+
+    // If not submitted, show if it's 'Published' or 'Ongoing'
+    return exam.status === 'Published' || exam.status === 'Ongoing';
+  });
 
   return (
     <div className="container py-8">
