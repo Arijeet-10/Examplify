@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { collection, query, where, onSnapshot, getDocs, doc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { db, auth } from "@/lib/firebase";
@@ -103,9 +104,17 @@ export default function StudentDashboard() {
             ))}
         </div>
       ) : exams.length === 0 ? (
-        <div className="flex flex-col items-center justify-center text-center min-h-[300px] border rounded-lg">
+        <div className="flex flex-col items-center justify-center text-center min-h-[400px] border-2 border-dashed rounded-lg p-8 bg-muted/50">
+            <Image 
+                src="https://picsum.photos/seed/exams-done/600/400" 
+                alt="No exams available"
+                width={600}
+                height={400}
+                className="max-w-sm rounded-lg mb-6 object-cover"
+                data-ai-hint="abstract illustration"
+            />
             <h3 className="text-xl font-semibold">No Exams Available</h3>
-            <p className="text-muted-foreground">There are currently no published exams for you to take.</p>
+            <p className="text-muted-foreground">There are currently no published exams for you to take. Check back later!</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

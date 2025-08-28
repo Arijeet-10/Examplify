@@ -19,8 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpenCheck, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { Separator } from "@/components/ui/separator";
+import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
@@ -94,8 +93,18 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-background">
       <div className="w-full max-w-md">
         <Tabs defaultValue="student" onValueChange={setActiveTab} className="w-full">
-          <Card className="shadow-2xl">
-            <CardHeader className="text-center">
+          <Card className="shadow-2xl overflow-hidden">
+             <div className="bg-primary/10 p-4 flex justify-center">
+                 <Image 
+                    src="https://picsum.photos/seed/tech/400/200" 
+                    alt="Technical background" 
+                    width={400}
+                    height={200}
+                    className="rounded-md object-cover"
+                    data-ai-hint="circuit board"
+                />
+             </div>
+            <CardHeader className="text-center pt-4">
               <div className="flex justify-center items-center gap-2 mb-2">
                 <BookOpenCheck className="h-8 w-8 text-primary" />
                 <h1 className="text-3xl font-bold font-headline text-primary">

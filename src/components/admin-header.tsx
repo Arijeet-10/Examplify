@@ -57,7 +57,7 @@ export function AdminHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar>
-                <AvatarImage src="https://picsum.photos/100" alt="Admin" data-ai-hint="person face" />
+                <AvatarImage src="https://picsum.photos/seed/admin-avatar/100" alt="Admin" data-ai-hint="person face" />
                 <AvatarFallback>A</AvatarFallback>
               </Avatar>
             </Button>
