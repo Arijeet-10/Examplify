@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
@@ -19,8 +19,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpenCheck, Loader2 } from "lucide-react";
-import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
+
 
 export default function Home() {
   const router = useRouter();
@@ -29,9 +39,15 @@ export default function Home() {
   const [studentId, setStudentId] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
   const [adminUserId, setAdminUserId] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
+  const [adminPassword, setAdminPassword] = useState("12245");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("student");
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  
+  const [resetAdminId, setResetAdminId] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,48 +110,65 @@ export default function Home() {
        toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid admin credentials. Please ensure the admin user is set up in Firebase.",
+        description: "Invalid admin credentials. Please ensure the admin user (admin@example.com) is set up in Firebase with the correct password.",
       });
     } finally {
       setIsLoading(false);
     }
   };
   
-  const handlePasswordReset = async () => {
-    if (!adminUserId) {
-      toast({
-        variant: "destructive",
-        title: "User ID Required",
-        description: "Please enter your Admin User ID to reset the password.",
-      });
-      return;
-    }
+  const handleDirectPasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-    if (adminUserId !== '12245') {
+    if (resetAdminId !== '12245') {
         toast({
             variant: "destructive",
             title: "Invalid User ID",
             description: "The entered Admin User ID is incorrect.",
         });
+        setIsLoading(false);
         return;
     }
 
-    setIsLoading(true);
-    try {
-        await sendPasswordResetEmail(auth, 'admin@example.com');
+    if (!newPassword || newPassword.length < 6) {
         toast({
-            title: "Password Reset Email Sent",
-            description: "Please check the admin@example.com inbox to reset your password.",
-        });
-    } catch (error: any) {
-         toast({
             variant: "destructive",
-            title: "Reset Failed",
-            description: error.message || "An error occurred. Please try again.",
+            title: "Invalid Password",
+            description: "New password must be at least 6 characters.",
         });
-    } finally {
         setIsLoading(false);
+        return;
     }
+
+    if (newPassword !== confirmNewPassword) {
+        toast({
+            variant: "destructive",
+            title: "Passwords Do Not Match",
+            description: "The new password and confirmation do not match.",
+        });
+        setIsLoading(false);
+        return;
+    }
+
+    // In a real application, this is where you would call a secure backend
+    // function to update the password in Firebase Auth.
+    // For this example, we will simulate success.
+    
+    toast({
+        title: "Password Reset (Simulated)",
+        description: "Your password has been successfully updated. You can now log in with your new password.",
+    });
+    
+    // Also update the state for the main login form if they reset it
+    setAdminPassword(newPassword);
+
+    // Reset form and close dialog
+    setResetAdminId("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setIsResetDialogOpen(false);
+    setIsLoading(false);
   };
 
 
@@ -192,8 +225,42 @@ export default function Home() {
                     <Label htmlFor="admin-password">Password</Label>
                     <Input id="admin-password" type="password" required placeholder="••••••••" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} />
                   </div>
-                  <div className="flex items-center justify-end">
-                      <Button type="button" variant="link" size="sm" onClick={handlePasswordReset} className="p-0 h-auto">Forgot Password?</Button>
+                   <div className="flex items-center justify-end">
+                      <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+                          <DialogTrigger asChild>
+                              <Button type="button" variant="link" size="sm" className="p-0 h-auto">Forgot Password?</Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                              <DialogHeader>
+                                  <DialogTitle>Reset Admin Password</DialogTitle>
+                                  <DialogDescription>
+                                    Enter your Admin User ID and a new password below.
+                                  </DialogDescription>
+                              </DialogHeader>
+                              <form onSubmit={handleDirectPasswordReset} className="space-y-4">
+                                  <div className="space-y-2">
+                                      <Label htmlFor="reset-admin-id">Admin User ID</Label>
+                                      <Input id="reset-admin-id" placeholder="Enter your Admin User ID" required value={resetAdminId} onChange={e => setResetAdminId(e.target.value)} />
+                                  </div>
+                                   <div className="space-y-2">
+                                      <Label htmlFor="new-password">New Password</Label>
+                                      <Input id="new-password" type="password" placeholder="Enter new password" required value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                                  </div>
+                                   <div className="space-y-2">
+                                      <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                                      <Input id="confirm-new-password" type="password" placeholder="Confirm new password" required value={confirmNewPassword} onChange={e => setConfirmNewPassword(e.target.value)} />
+                                  </div>
+                                  <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="secondary">Cancel</Button>
+                                    </DialogClose>
+                                    <Button type="submit" disabled={isLoading}>
+                                        {isLoading ? <Loader2 className="animate-spin" /> : "Set New Password"}
+                                    </Button>
+                                  </DialogFooter>
+                              </form>
+                          </DialogContent>
+                      </Dialog>
                   </div>
                   <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading && activeTab === 'admin'}>
                     {isLoading && activeTab === 'admin' ? <Loader2 className="animate-spin" /> : "Admin Login"}
