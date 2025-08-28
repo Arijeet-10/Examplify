@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { collection, query, where, onSnapshot, getDocs } from "firebase/firestore";
+import { collection, query, where, onSnapshot, getDocs, doc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { db, auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Clock, HelpCircle, CheckCircle } from "lucide-react";
-import type { Exam, Submission } from "@/types";
+import type { Exam, Submission, Student } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function StudentDashboard() {
   const [user] = useAuthState(auth);
+  const [studentName, setStudentName] = useState("");
   const [exams, setExams] = useState<Exam[]>([]);
   const [submissions, setSubmissions] = useState<string[]>([]); // list of submitted exam IDs
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +31,15 @@ export default function StudentDashboard() {
       setIsLoading(false);
       return;
     }
+    
+    const fetchStudentData = async () => {
+        const studentDocRef = doc(db, "students", user.uid);
+        const studentDoc = await getDoc(studentDocRef);
+        if (studentDoc.exists()) {
+            setStudentName((studentDoc.data() as Student).name);
+        }
+    };
+    fetchStudentData();
 
     // Fetch submitted exam IDs
     const submissionsQuery = query(collection(db, "submissions"), where("studentId", "==", user.uid));
@@ -70,7 +80,7 @@ export default function StudentDashboard() {
   return (
     <div className="container py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold font-headline">Welcome, Student!</h1>
+        <h1 className="text-3xl font-bold font-headline">Welcome, {studentName || 'Student'}!</h1>
         <p className="text-muted-foreground">Here are your available exams. Good luck!</p>
       </div>
 
