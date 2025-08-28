@@ -162,7 +162,9 @@ export default function ExamsPage() {
                                <Link href={`/admin/exams/edit/${exam.id}`}>
                                 <DropdownMenuItem>Edit</DropdownMenuItem>
                                </Link>
-                              <DropdownMenuItem>Monitor</DropdownMenuItem>
+                               <Link href={`/admin/monitoring`}>
+                                <DropdownMenuItem>Monitor</DropdownMenuItem>
+                               </Link>
                                <Link href={`/admin/exams/grade/${exam.id}`}>
                                 <DropdownMenuItem>Grade</DropdownMenuItem>
                                </Link>
@@ -199,5 +201,3 @@ export default function ExamsPage() {
     </div>
   );
 }
-
-    

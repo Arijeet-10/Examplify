@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -34,10 +35,12 @@ export function StudentHeader() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Student Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>My Profile</span>
-              </DropdownMenuItem>
+              <Link href="/student/dashboard">
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>My Profile</span>
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuSeparator />
               <Link href="/">
                 <DropdownMenuItem>

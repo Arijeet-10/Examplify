@@ -1,8 +1,9 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
@@ -31,15 +32,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { AddStudentForm } from "@/components/add-student-form";
 import type { Student } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
 
    useEffect(() => {
     const studentsColRef = collection(db, "students");
@@ -54,6 +68,24 @@ export default function StudentsPage() {
 
     return () => unsubscribe();
   }, []);
+
+  const handleDeactivateStudent = async (studentId: string) => {
+    try {
+        const studentDocRef = doc(db, "students", studentId);
+        await updateDoc(studentDocRef, { status: "Inactive" });
+        toast({
+            title: "Student Deactivated",
+            description: "The student's status has been set to Inactive.",
+        });
+    } catch (error) {
+        console.error("Error deactivating student:", error);
+        toast({
+            variant: "destructive",
+            title: "Update Failed",
+            description: "An error occurred while deactivating the student.",
+        });
+    }
+  };
 
   return (
     <div className="p-4 md:p-8">
@@ -128,25 +160,43 @@ export default function StudentsPage() {
                     </TableCell>
                     <TableCell>{student.joined}</TableCell>
                     <TableCell>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                         <Link href={`/admin/students/view/${student.id}`}>
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                         </Link>
-                         <Link href={`/admin/students/edit/${student.id}`}>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                         </Link>
-                        <DropdownMenuItem className="text-destructive">
-                            Deactivate
-                        </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                      <AlertDialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <Link href={`/admin/students/view/${student.id}`}>
+                                <DropdownMenuItem>View Details</DropdownMenuItem>
+                            </Link>
+                            <Link href={`/admin/students/edit/${student.id}`}>
+                                <DropdownMenuItem>Edit</DropdownMenuItem>
+                            </Link>
+                             <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-destructive">
+                                    Deactivate
+                                </DropdownMenuItem>
+                              </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                         <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will set the student's status to "Inactive". They may lose access to certain features.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDeactivateStudent(student.id)} className="bg-destructive hover:bg-destructive/90">
+                                Deactivate
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                       </AlertDialog>
                     </TableCell>
                 </TableRow>
                 ))
