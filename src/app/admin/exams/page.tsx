@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,14 +6,6 @@ import Link from "next/link";
 import { collection, onSnapshot, doc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -22,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
+import { MoreHorizontal, PlusCircle, FileText, Clock, Calendar } from "lucide-react";
 import type { Exam } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -37,6 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 
 export default function ExamsPage() {
@@ -66,9 +58,6 @@ export default function ExamsPage() {
   }, []);
 
   const handleDeleteExam = async (examId: string) => {
-    // In a real app, you might want to also delete subcollections recursively.
-    // Firestore doesn't support this natively on the client, so it would
-    // require a Cloud Function for a complete cleanup.
     try {
       await deleteDoc(doc(db, "exams", examId));
       toast({
@@ -95,7 +84,7 @@ export default function ExamsPage() {
       case "Completed":
         return "outline";
       case "Ongoing":
-        return "destructive"; // Using destructive variant to simulate an 'accent' color for ongoing
+        return "destructive";
       default:
         return "secondary";
     }
@@ -112,92 +101,107 @@ export default function ExamsPage() {
           </Button>
         </Link>
       </div>
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>
-                <span className="sr-only">Actions</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-               Array.from({ length: 4 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell colSpan={4}>
-                    <Skeleton className="h-10 w-full" />
-                  </TableCell>
-                </TableRow>
-               ))
-            ) : exams.length === 0 ? (
-                <TableRow>
-                    <TableCell colSpan={4} className="text-center h-24">
-                        No exams created yet.
-                    </TableCell>
-                </TableRow>
-            ) : (
-                exams.map((exam) => (
-                  <TableRow key={exam.id}>
-                    <TableCell className="font-medium">{exam.title}</TableCell>
-                    <TableCell>
-                      <Badge variant={getBadgeVariant(exam.status)}>
-                        {exam.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{exam.date}</TableCell>
-                    <TableCell>
-                       <AlertDialog>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                               <Link href={`/admin/exams/edit/${exam.id}`}>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                               </Link>
-                               <Link href={`/admin/monitoring`}>
-                                <DropdownMenuItem>Monitor</DropdownMenuItem>
-                               </Link>
-                               <Link href={`/admin/exams/grade/${exam.id}`}>
-                                <DropdownMenuItem>Grade</DropdownMenuItem>
-                               </Link>
-                              <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-destructive">
-                                  Delete
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the exam
-                                and all its questions.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDeleteExam(exam.id)} className="bg-destructive hover:bg-destructive/90">
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                       </AlertDialog>
-                    </TableCell>
-                  </TableRow>
-                ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+
+       {isLoading ? (
+         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+             {Array.from({ length: 8 }).map((_, i) => (
+                <Card key={i}>
+                    <CardHeader>
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2 mt-2" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-2/3" />
+                    </CardContent>
+                    <CardFooter>
+                        <Skeleton className="h-10 w-full" />
+                    </CardFooter>
+                </Card>
+             ))}
+         </div>
+        ) : exams.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center min-h-[400px] border-2 border-dashed rounded-lg">
+                <FileText className="w-16 h-16 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold">No Exams Found</h3>
+                <p className="text-muted-foreground">Get started by creating a new exam.</p>
+                 <Link href="/admin/exams/create" className="mt-4">
+                  <Button>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create New Exam
+                  </Button>
+                </Link>
+            </div>
+        ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {exams.map((exam) => (
+                    <Card key={exam.id} className="flex flex-col">
+                        <CardHeader>
+                            <div className="flex justify-between items-start">
+                                <CardTitle className="font-headline text-lg leading-tight">{exam.title}</CardTitle>
+                                <Badge variant={getBadgeVariant(exam.status)} className="shrink-0">
+                                    {exam.status}
+                                </Badge>
+                            </div>
+                            <CardDescription className="line-clamp-2">{exam.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-grow space-y-3 text-sm text-muted-foreground">
+                             <div className="flex items-center">
+                                <Calendar className="mr-2 h-4 w-4" />
+                                <span>{exam.date}</span>
+                            </div>
+                            <div className="flex items-center">
+                                <Clock className="mr-2 h-4 w-4" />
+                                <span>{exam.duration} minutes</span>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="bg-muted/50 p-2">
+                             <AlertDialog>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-full justify-start px-2">
+                                        <MoreHorizontal className="h-4 w-4 mr-2" />
+                                        <span>Actions</span>
+                                    </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start" className="w-48">
+                                    <Link href={`/admin/exams/edit/${exam.id}`}>
+                                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                                    </Link>
+                                    <Link href={`/admin/monitoring`}>
+                                        <DropdownMenuItem>Monitor</DropdownMenuItem>
+                                    </Link>
+                                    <Link href={`/admin/exams/grade/${exam.id}`}>
+                                        <DropdownMenuItem>Grade</DropdownMenuItem>
+                                    </Link>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem className="text-destructive">
+                                        Delete
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete the exam
+                                        and all its related data.
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDeleteExam(exam.id)} className="bg-destructive hover:bg-destructive/90">
+                                        Delete
+                                    </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        </CardFooter>
+                    </Card>
+                ))}
+            </div>
+        )}
     </div>
   );
 }

@@ -11,7 +11,7 @@ import { EditStudentForm } from "@/components/edit-student-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft } from "lucide-react";
+import { AlertCircle, ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { updatePassword, signInWithEmailAndPassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
@@ -130,12 +130,16 @@ export default function EditStudentPage({ params: { id } }: { params: { id: stri
 
     return (
         <div className="p-4 md:p-8 max-w-2xl mx-auto">
-            <div className="mb-6">
+            <div className="mb-6 flex justify-between items-center">
                 <Button asChild variant="outline" size="sm">
                    <Link href="/admin/students">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to All Students
                    </Link>
+                </Button>
+                <Button variant="destructive-outline" size="sm">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Deactivate Student
                 </Button>
             </div>
             <Card>

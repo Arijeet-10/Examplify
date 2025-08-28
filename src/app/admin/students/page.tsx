@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,22 +6,8 @@ import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, UserPlus } from "lucide-react";
+import { MoreHorizontal, UserPlus, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Dialog,
@@ -47,7 +32,7 @@ import { AddStudentForm } from "@/components/add-student-form";
 import type { Student } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -109,79 +94,80 @@ export default function StudentsPage() {
           </DialogContent>
         </Dialog>
       </div>
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Student ID</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Date Joined</TableHead>
-              <TableHead>
-                <span className="sr-only">Actions</span>
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell colSpan={5}>
-                     <Skeleton className="h-10 w-full" />
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : students.length === 0 ? (
-                <TableRow>
-                    <TableCell colSpan={5} className="text-center h-24">
-                        No students found.
-                    </TableCell>
-                </TableRow>
-            ) : (
-                students.map((student) => (
-                <TableRow key={student.id}>
-                    <TableCell className="font-medium">
-                    <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9">
+      
+       {isLoading ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+             {Array.from({ length: 8 }).map((_, i) => (
+                 <Card key={i}>
+                    <CardHeader className="items-center">
+                       <Skeleton className="h-20 w-20 rounded-full" />
+                       <Skeleton className="h-6 w-3/4 mt-3" />
+                       <Skeleton className="h-4 w-1/2 mt-1" />
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-full" />
+                    </CardContent>
+                    <CardFooter>
+                        <Skeleton className="h-10 w-full" />
+                    </CardFooter>
+                </Card>
+             ))}
+         </div>
+       ) : students.length === 0 ? (
+           <div className="flex flex-col items-center justify-center text-center min-h-[400px] border-2 border-dashed rounded-lg">
+                <Users className="w-16 h-16 text-muted-foreground mb-4" />
+                <h3 className="text-xl font-semibold">No Students Added</h3>
+                <p className="text-muted-foreground">Add students to begin managing them.</p>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="mt-4">
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Add New Student
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New Student</DialogTitle>
+                      <DialogDescription>
+                        Enter the details below to create a new student account.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <AddStudentForm onFinished={() => setIsDialogOpen(false)} />
+                  </DialogContent>
+                </Dialog>
+            </div>
+       ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {students.map((student) => (
+            <Card key={student.id} className="flex flex-col text-center">
+                <CardHeader className="items-center">
+                     <Avatar className="h-20 w-20">
                         <AvatarImage src={student.photoURL || `https://picsum.photos/seed/${student.id}/100`} data-ai-hint="person face" />
-                        <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div className="grid gap-0.5">
-                        <p className="font-medium">{student.name}</p>
-                        <p className="text-xs text-muted-foreground">{student.email}</p>
-                        </div>
-                    </div>
-                    </TableCell>
-                    <TableCell>{student.studentId}</TableCell>
-                    <TableCell>
+                        <AvatarFallback className="text-2xl">{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <CardTitle className="text-lg">{student.name}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow space-y-2 text-sm">
+                    <p className="text-muted-foreground truncate">{student.email}</p>
+                    <p>Student ID: <span className="font-semibold">{student.studentId}</span></p>
                     <Badge variant={student.status === "Active" ? "default" : "secondary"}>
                         {student.status}
                     </Badge>
-                    </TableCell>
-                    <TableCell>{student.joined}</TableCell>
-                    <TableCell>
-                      <AlertDialog>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
+                </CardContent>
+                <CardFooter className="bg-muted/50 p-2 flex gap-2">
+                    <Button asChild variant="outline" className="flex-1">
+                        <Link href={`/admin/students/view/${student.id}`}>View</Link>
+                    </Button>
+                    <Button asChild variant="outline" className="flex-1">
+                        <Link href={`/admin/students/edit/${student.id}`}>Edit</Link>
+                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive-outline" size="icon">
+                                <Trash2 className="h-4 w-4" />
                             </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                            <Link href={`/admin/students/view/${student.id}`}>
-                                <DropdownMenuItem>View Details</DropdownMenuItem>
-                            </Link>
-                            <Link href={`/admin/students/edit/${student.id}`}>
-                                <DropdownMenuItem>Edit</DropdownMenuItem>
-                            </Link>
-                             <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-destructive">
-                                    Deactivate
-                                </DropdownMenuItem>
-                              </AlertDialogTrigger>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        </AlertDialogTrigger>
                          <AlertDialogContent>
                             <AlertDialogHeader>
                               <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -197,13 +183,11 @@ export default function StudentsPage() {
                             </AlertDialogFooter>
                           </AlertDialogContent>
                        </AlertDialog>
-                    </TableCell>
-                </TableRow>
-                ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                </CardFooter>
+            </Card>
+            ))}
+        </div>
+       )}
     </div>
   );
 }
