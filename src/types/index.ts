@@ -32,6 +32,15 @@ export type Student = {
     phone?: string;
 };
 
+export type Admin = {
+    id: string;
+    name: string;
+    email: string;
+    designation: string;
+    phone: string;
+    photoURL?: string;
+};
+
 export type Submission = {
     id: string;
     examId: string;
