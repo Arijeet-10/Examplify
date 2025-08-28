@@ -21,7 +21,7 @@ export function AdminHeader() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/95 backdrop-blur-sm px-4 md:px-6">
       <Link
-        href="/admin/exams"
+        href="/admin/dashboard"
         className="mr-6 hidden items-center space-x-2 md:flex"
       >
         <BookOpenCheck className="h-6 w-6 text-primary" />
@@ -38,7 +38,7 @@ export function AdminHeader() {
             </SheetTrigger>
             <SheetContent side="left" className="w-60 p-2">
                  <div className="p-2 border-b mb-2">
-                     <Link href="/admin/exams" className="flex items-center gap-2">
+                     <Link href="/admin/dashboard" className="flex items-center gap-2">
                         <BookOpenCheck className="h-6 w-6 text-primary" />
                         <span className="font-bold font-headline text-lg">Examplify</span>
                     </Link>

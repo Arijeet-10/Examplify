@@ -8,9 +8,11 @@ import {
   FileText,
   Users,
   BarChart,
+  LayoutDashboard,
 } from "lucide-react";
 
 const navItems = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/exams", label: "Exams", icon: FileText },
   { href: "/admin/students", label: "Students", icon: Users },
   { href: "/admin/monitoring", label: "Monitoring", icon: BarChart },

@@ -93,7 +93,7 @@ export default function Home() {
     e.preventDefault();
     setIsLoading(true);
 
-    if (adminUserId !== 'admin@gmail.com' || adminPassword !== '012245') {
+    if (adminUserId !== '12245' || adminPassword !== '12245') {
         toast({
             variant: "destructive",
             title: "Login Failed",
@@ -104,8 +104,8 @@ export default function Home() {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, 'admin@gmail.com', adminPassword);
-      router.push("/admin/exams");
+      await signInWithEmailAndPassword(auth, 'admin@example.com', adminPassword);
+      router.push("/admin/dashboard");
     } catch (error) {
        toast({
         variant: "destructive",
