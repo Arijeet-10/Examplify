@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
@@ -28,7 +28,7 @@ export default function Home() {
 
   const [studentId, setStudentId] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
+  const [adminUserId, setAdminUserId] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("student");
@@ -64,7 +64,9 @@ export default function Home() {
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message || "Invalid credentials. Please try again.",
+        description: error.code === 'auth/invalid-credential' 
+            ? "Invalid credentials. Please try again."
+            : error.message || "An unknown error occurred.",
       });
     } finally {
       setIsLoading(false);
@@ -74,17 +76,65 @@ export default function Home() {
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
+    if (adminUserId !== '12245' || adminPassword !== '12245') {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: "Invalid Admin User ID or Password.",
+        });
+        setIsLoading(false);
+        return;
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
+      await signInWithEmailAndPassword(auth, 'admin@example.com', adminPassword);
       router.push("/admin/exams");
     } catch (error) {
        toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid admin credentials. Please try again.",
+        description: "Invalid admin credentials. Please ensure the admin user is set up in Firebase.",
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+  
+  const handlePasswordReset = async () => {
+    if (!adminUserId) {
+      toast({
+        variant: "destructive",
+        title: "User ID Required",
+        description: "Please enter your Admin User ID to reset the password.",
+      });
+      return;
+    }
+
+    if (adminUserId !== '12245') {
+        toast({
+            variant: "destructive",
+            title: "Invalid User ID",
+            description: "The entered Admin User ID is incorrect.",
+        });
+        return;
+    }
+
+    setIsLoading(true);
+    try {
+        await sendPasswordResetEmail(auth, 'admin@example.com');
+        toast({
+            title: "Password Reset Email Sent",
+            description: "Please check the admin@example.com inbox to reset your password.",
+        });
+    } catch (error: any) {
+         toast({
+            variant: "destructive",
+            title: "Reset Failed",
+            description: error.message || "An error occurred. Please try again.",
+        });
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -129,19 +179,21 @@ export default function Home() {
               <TabsContent value="admin">
                 <form onSubmit={handleAdminLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="admin-email">Email</Label>
+                    <Label htmlFor="admin-user-id">Admin User ID</Label>
                     <Input
-                      id="admin-email"
-                      type="email"
-                      placeholder="admin@example.com"
+                      id="admin-user-id"
+                      placeholder="e.g., 12245"
                       required
-                      value={adminEmail}
-                      onChange={e => setAdminEmail(e.target.value)}
+                      value={adminUserId}
+                      onChange={e => setAdminUserId(e.target.value)}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="admin-password">Password</Label>
                     <Input id="admin-password" type="password" required placeholder="••••••••" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} />
+                  </div>
+                  <div className="flex items-center justify-end">
+                      <Button type="button" variant="link" size="sm" onClick={handlePasswordReset} className="p-0 h-auto">Forgot Password?</Button>
                   </div>
                   <Button type="submit" className="w-full mt-2 bg-primary hover:bg-primary/90 text-primary-foreground" disabled={isLoading && activeTab === 'admin'}>
                     {isLoading && activeTab === 'admin' ? <Loader2 className="animate-spin" /> : "Admin Login"}
