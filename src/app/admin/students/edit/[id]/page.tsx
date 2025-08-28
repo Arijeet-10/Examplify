@@ -50,7 +50,7 @@ export default function EditStudentPage({ params: { id } }: { params: { id: stri
         }
     }, [id]);
 
-    const handleUpdateStudent = async (data: { name: string; studentId: string; status: "Active" | "Inactive"; password?: string }) => {
+    const handleUpdateStudent = async (data: { name: string; studentId: string; status: "Active" | "Inactive"; phone?: string; password?: string }) => {
         setIsSubmitting(true);
         try {
             const studentDocRef = doc(db, "students", id);
@@ -60,6 +60,7 @@ export default function EditStudentPage({ params: { id } }: { params: { id: stri
                 name: data.name,
                 studentId: data.studentId,
                 status: data.status,
+                phone: data.phone || "",
             });
 
             // Update password in Auth if provided
@@ -106,6 +107,7 @@ export default function EditStudentPage({ params: { id } }: { params: { id: stri
                         <Skeleton className="h-4 w-3/4 mt-2" />
                     </CardHeader>
                     <CardContent className="space-y-8">
+                        <Skeleton className="h-10 w-full" />
                         <Skeleton className="h-10 w-full" />
                         <Skeleton className="h-10 w-full" />
                         <Skeleton className="h-10 w-full" />

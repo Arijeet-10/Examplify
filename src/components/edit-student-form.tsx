@@ -29,6 +29,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   studentId: z.string().min(1, { message: "Student ID cannot be empty." }),
   status: z.enum(["Active", "Inactive"]),
+  phone: z.string().optional(),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional().or(z.literal('')),
   confirmPassword: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -49,6 +50,7 @@ export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFor
       name: student.name,
       studentId: student.studentId,
       status: student.status,
+      phone: student.phone || "",
       password: "",
       confirmPassword: "",
     },
@@ -83,6 +85,19 @@ export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFor
               <FormLabel>Student ID</FormLabel>
               <FormControl>
                 <Input placeholder="STU001" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number</FormLabel>
+              <FormControl>
+                <Input placeholder="+1 234 567 890" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

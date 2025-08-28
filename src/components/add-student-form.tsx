@@ -27,6 +27,7 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
   studentId: z.string().min(1, { message: "Student ID cannot be empty." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  phone: z.string().optional(),
 });
 
 export function AddStudentForm({ onFinished }: { onFinished: () => void }) {
@@ -40,6 +41,7 @@ export function AddStudentForm({ onFinished }: { onFinished: () => void }) {
       email: "",
       studentId: "",
       password: "",
+      phone: "",
     },
   });
 
@@ -55,6 +57,7 @@ export function AddStudentForm({ onFinished }: { onFinished: () => void }) {
         name: values.name,
         email: values.email,
         studentId: values.studentId,
+        phone: values.phone || "",
         status: "Active",
         joined: format(new Date(), 'yyyy-MM-dd'),
       });
@@ -119,6 +122,19 @@ export function AddStudentForm({ onFinished }: { onFinished: () => void }) {
               <FormLabel>Student ID</FormLabel>
               <FormControl>
                 <Input placeholder="STU001" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+         <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone Number (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="+1 234 567 890" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
