@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  email: z.string().email({ message: "Please enter a valid email." }),
   designation: z.string().min(2, { message: "Designation must be at least 2 characters." }),
   phone: z.string().optional(),
 });
@@ -28,13 +29,15 @@ type EditAdminFormProps = {
   profile: Admin;
   onUpdate: (data: z.infer<typeof formSchema>) => Promise<void>;
   isLoading: boolean;
+  loginEmail: string;
 };
 
-export function EditAdminForm({ profile, onUpdate, isLoading }: EditAdminFormProps) {
+export function EditAdminForm({ profile, onUpdate, isLoading, loginEmail }: EditAdminFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: profile.name,
+      email: profile.email || "",
       designation: profile.designation,
       phone: profile.phone || "",
     },
@@ -44,10 +47,24 @@ export function EditAdminForm({ profile, onUpdate, isLoading }: EditAdminFormPro
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onUpdate)} className="space-y-6">
         <div className="space-y-2">
-            <Label>Email Address</Label>
-            <Input value={profile.email} disabled />
-            <p className="text-xs text-muted-foreground">Email cannot be changed as it's tied to your login.</p>
+            <Label>Login Email</Label>
+            <Input value={loginEmail} disabled />
+            <p className="text-xs text-muted-foreground">This is the email you use to log in and cannot be changed.</p>
         </div>
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Contact Email</FormLabel>
+              <FormControl>
+                <Input placeholder="admin@example.com" {...field} />
+              </FormControl>
+               <p className="text-xs text-muted-foreground">This is the email for display and contact purposes.</p>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="name"

@@ -74,13 +74,17 @@ export default function AdminProfilePage() {
                     <AvatarFallback className="text-3xl">{adminProfile?.name?.charAt(0) || 'A'}</AvatarFallback>
                 </Avatar>
                 <CardTitle className="text-2xl mt-4">{adminProfile?.name || 'Administrator'}</CardTitle>
-                <CardDescription>{adminProfile?.designation || user.email}</CardDescription>
+                <CardDescription>{adminProfile?.designation || "Designation not set"}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 text-sm">
                    <div className="grid gap-1.5">
-                        <p className="font-medium text-muted-foreground">Email</p>
+                        <p className="font-medium text-muted-foreground">Login Email</p>
                         <p>{user.email}</p>
+                    </div>
+                    <div className="grid gap-1.5">
+                        <p className="font-medium text-muted-foreground">Contact Email</p>
+                        <p>{adminProfile?.email || "Not set"}</p>
                     </div>
                      <div className="grid gap-1.5">
                         <p className="font-medium text-muted-foreground">Phone Number</p>

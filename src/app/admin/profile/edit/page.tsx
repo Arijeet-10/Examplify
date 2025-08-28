@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -59,7 +59,7 @@ export default function EditAdminProfilePage() {
 
     }, [user, authLoading]);
 
-    const handleUpdateProfile = async (data: Omit<Admin, 'id' | 'email'>) => {
+    const handleUpdateProfile = async (data: Omit<Admin, 'id'>) => {
         if (!user) {
             toast({ variant: "destructive", title: "Not Authenticated" });
             return;
@@ -70,10 +70,7 @@ export default function EditAdminProfilePage() {
             const profileDocRef = doc(db, "admins", user.uid);
             
             // Using set with merge to create or update the document
-            await setDoc(profileDocRef, {
-                ...data,
-                email: user.email, // Ensure email is always set
-            }, { merge: true });
+            await setDoc(profileDocRef, data, { merge: true });
 
             toast({
                 title: "Profile Updated",
@@ -144,6 +141,7 @@ export default function EditAdminProfilePage() {
                             profile={profile}
                             onUpdate={handleUpdateProfile}
                             isLoading={isSubmitting}
+                            loginEmail={user?.email || ""}
                         />
                     )}
                 </CardContent>

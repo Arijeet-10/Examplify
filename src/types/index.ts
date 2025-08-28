@@ -35,7 +35,7 @@ export type Student = {
 export type Admin = {
     id: string;
     name: string;
-    email: string;
+    email?: string;
     designation: string;
     phone: string;
     photoURL?: string;
