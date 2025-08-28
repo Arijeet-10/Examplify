@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { QuestionGenerator } from "@/components/question-generator";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import type { GeneratedQuestion, Exam } from "@/types";
@@ -24,7 +23,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, Plus, Trash2, Wand, X } from "lucide-react";
+import { Plus, Trash2, Wand, X } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -106,7 +105,7 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Wand className="w-5 h-5"/>Manual Question Entry</CardTitle>
+                <CardTitle className="flex items-center gap-2"><Wand className="w-5 h-5"/>Add Questions</CardTitle>
                 <CardDescription>Create your own questions and add them to the exam.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -203,16 +202,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
     onSubmit(examData, questions);
   }
 
-  const addQuestionsToExam = (newQuestions: GeneratedQuestion[]) => {
-    const questionsWithIds = newQuestions.map(q => ({ ...q, id: `ai-${Date.now()}-${Math.random()}` }));
-    setQuestions(prev => [...prev, ...questionsWithIds]);
-    toast({
-        title: `${newQuestions.length} Questions Added`,
-        description: "The generated questions have been added to the exam draft.",
-    });
-  }
-
-  const addSingleQuestionToExam = (newQuestion: GeneratedQuestion) => {
+  const addQuestionToExam = (newQuestion: GeneratedQuestion) => {
     setQuestions(prev => [...prev, newQuestion]);
      toast({
         title: "Question Added",
@@ -275,19 +265,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
         </CardContent>
       </Card>
       
-      <Tabs defaultValue="ai-generator" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="ai-generator"><Bot className="mr-2 h-4 w-4"/>AI Generator</TabsTrigger>
-                <TabsTrigger value="manual-entry"><Wand className="mr-2 h-4 w-4"/>Manual Entry</TabsTrigger>
-            </TabsList>
-            <TabsContent value="ai-generator" className="mt-6">
-                 <QuestionGenerator onQuestionsGenerated={addQuestionsToExam} />
-            </TabsContent>
-            <TabsContent value="manual-entry" className="mt-6">
-                <ManualQuestionCreator onQuestionAdded={addSingleQuestionToExam} />
-            </TabsContent>
-        </Tabs>
-
+      <ManualQuestionCreator onQuestionAdded={addQuestionToExam} />
 
       {questions.length > 0 && (
           <Card>
