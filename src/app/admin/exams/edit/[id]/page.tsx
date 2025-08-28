@@ -60,7 +60,7 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
             toast({
                 variant: "destructive",
                 title: "No Questions",
-                description: "An exam must have at least one question.",
+                description: "An exam must have at least one question in its bank.",
             });
             return;
         }
@@ -85,19 +85,18 @@ export default function EditExamPage({ params }: { params: { id: string } }) {
                 updatedAt: new Date(),
             });
 
-            // For simplicity, we'll overwrite the questions.
-            // A more complex implementation might diff changes.
+            // We'll overwrite the questions in the question bank.
             const batch = writeBatch(db);
             const questionsColRef = collection(db, "exams", id, "questions");
 
-            // First, delete old questions (optional, but good for cleanup)
+            // First, delete old questions 
             const oldQuestionsSnapshot = await getDocs(questionsColRef);
             oldQuestionsSnapshot.forEach(doc => batch.delete(doc.ref));
 
             // Then, add the new/updated list of questions
             questions.forEach((q) => {
-                // If a question has an ID, it's an existing one. If not, it's new.
-                const questionDocRef = q.id ? doc(questionsColRef, q.id) : doc(questionsColRef);
+                // Use the existing ID, or let Firestore generate one for new questions
+                const questionDocRef = q.id.startsWith('manual-') ? doc(questionsColRef) : doc(questionsColRef, q.id);
                 batch.set(questionDocRef, {
                     question: q.question,
                     answer: q.answer,

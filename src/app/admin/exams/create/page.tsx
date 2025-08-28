@@ -18,8 +18,8 @@ export default function CreateExamPage() {
     if (questions.length === 0) {
       toast({
         variant: "destructive",
-        title: "No Questions",
-        description: "Please add at least one question to the exam.",
+        title: "No Questions in Bank",
+        description: "Please add at least one question to the exam's question bank.",
       });
       return;
     }
@@ -43,12 +43,13 @@ export default function CreateExamPage() {
         status: examData.status || "Draft", // Ensure status is set
       });
 
-      // Add questions to a subcollection
+      // Add questions to the question bank subcollection
       const batch = writeBatch(db);
       const questionsColRef = collection(db, "exams", examDocRef.id, "questions");
 
       questions.forEach((q) => {
-        const questionDocRef = doc(questionsColRef); // Auto-generate ID
+        // Use the temporary manual ID or generate a new one
+        const questionDocRef = q.id.startsWith('manual-') ? doc(questionsColRef) : doc(questionsColRef, q.id);
         batch.set(questionDocRef, {
           question: q.question,
           answer: q.answer,
@@ -61,7 +62,7 @@ export default function CreateExamPage() {
 
       toast({
         title: "Exam Created",
-        description: "The exam and its questions have been saved successfully.",
+        description: "The exam and its question bank have been saved successfully.",
       });
 
       router.push("/admin/exams");

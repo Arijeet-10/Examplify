@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, collection, getDocs, addDoc, serverTimestamp, query, where } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, addDoc, serverTimestamp, query, where, documentId } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { db, auth } from "@/lib/firebase";
 import {
@@ -79,19 +79,29 @@ export function ExamInterface({ examId }: { examId: string }) {
           throw new Error("Exam not found or not available.");
         }
         
-        const examData = examSnapshot.data() as Omit<Exam, 'id'>;
-        setExam({ id: examSnapshot.id, ...examData });
+        const examData = { id: examSnapshot.id, ...examSnapshot.data() } as Exam;
+        setExam(examData);
         setTimeLeft(examData.duration * 60);
 
+        // Get the question IDs assigned to this student
+        const assignedQuestionIds = examData.studentQuestionAssignments?.[user.uid];
+
+        if (!assignedQuestionIds || assignedQuestionIds.length === 0) {
+            throw new Error("No questions have been assigned to you for this exam.");
+        }
+
+        // Fetch only the assigned questions from the question bank
         const questionsColRef = collection(db, "exams", examId, "questions");
-        const questionsSnapshot = await getDocs(questionsColRef);
+        const questionsQuery = query(questionsColRef, where(documentId(), "in", assignedQuestionIds));
+        const questionsSnapshot = await getDocs(questionsQuery);
+
         const fetchedQuestions = questionsSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Question[];
 
         if (fetchedQuestions.length === 0) {
-            throw new Error("This exam has no questions.");
+            throw new Error("Could not load your assigned questions.");
         }
 
         // Fisher-Yates shuffle algorithm
@@ -242,7 +252,7 @@ export function ExamInterface({ examId }: { examId: string }) {
               <Card className="w-full max-w-md text-center p-8">
                   <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
                   <h2 className="mt-4 text-2xl font-bold">No Questions Found</h2>
-                  <p className="mt-2 text-muted-foreground">This exam does not have any questions yet.</p>
+                  <p className="mt-2 text-muted-foreground">This exam does not have any questions yet or none were assigned to you.</p>
                   <Button onClick={() => router.push('/student/dashboard')} className="mt-6">Go to Dashboard</Button>
               </Card>
           </div>

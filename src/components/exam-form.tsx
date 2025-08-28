@@ -25,7 +25,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Wand, X, Users, Loader2 } from "lucide-react";
+import { Plus, Trash2, Wand, X, Users, Loader2, ListChecks } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -36,6 +36,14 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "./ui/checkbox";
 import { ScrollArea } from "./ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 
 function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question: GeneratedQuestion) => void }) {
@@ -109,8 +117,8 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Wand className="w-5 h-5"/>Add Questions</CardTitle>
-                <CardDescription>Create your own questions and add them to the exam.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><Wand className="w-5 h-5"/>Add Questions to Bank</CardTitle>
+                <CardDescription>Create questions that can be assigned to students. They will be stored in this exam's question bank.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                  <div className="space-y-2">
@@ -156,27 +164,33 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
                     </div>
                 )}
 
-                <Button type="button" onClick={handleAddQuestion}><Plus className="mr-2 h-4 w-4" /> Add Question to Exam</Button>
+                <Button type="button" onClick={handleAddQuestion}><Plus className="mr-2 h-4 w-4" /> Add Question to Bank</Button>
             </CardContent>
         </Card>
     );
 }
 
-function AssignStudents({ selectedStudents, onSelectionChange }: { selectedStudents: string[], onSelectionChange: (ids: string[]) => void }) {
-    const [allStudents, setAllStudents] = useState<Student[]>([]);
+function AssignStudents({ 
+    allStudents,
+    questionBank,
+    selectedStudents, 
+    onSelectionChange,
+    assignments,
+    onAssignmentChange
+}: { 
+    allStudents: Student[],
+    questionBank: GeneratedQuestion[],
+    selectedStudents: string[], 
+    onSelectionChange: (ids: string[]) => void,
+    assignments: Record<string, string[]>,
+    onAssignmentChange: (studentId: string, questionIds: string[]) => void
+}) {
     const [isLoading, setIsLoading] = useState(true);
-
+    
     useEffect(() => {
-        const fetchStudents = async () => {
-            setIsLoading(true);
-            const studentsQuery = query(collection(db, "students"), where("status", "==", "Active"));
-            const snapshot = await getDocs(studentsQuery);
-            const studentList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
-            setAllStudents(studentList);
-            setIsLoading(false);
-        };
-        fetchStudents();
-    }, []);
+      if (allStudents.length > 0) setIsLoading(false);
+    }, [allStudents]);
+
 
     const handleSelectAll = (checked: boolean) => {
         if (checked) {
@@ -191,16 +205,21 @@ function AssignStudents({ selectedStudents, onSelectionChange }: { selectedStude
             onSelectionChange([...selectedStudents, studentId]);
         } else {
             onSelectionChange(selectedStudents.filter(id => id !== studentId));
+            // Also remove their assignments
+            onAssignmentChange(studentId, []);
         }
     };
 
     const areAllSelected = allStudents.length > 0 && selectedStudents.length === allStudents.length;
 
+    const getStudentById = (id: string) => allStudents.find(s => s.id === id);
+
+
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5"/>Assign Students</CardTitle>
-                <CardDescription>Select which students are assigned to take this exam.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5"/>Assign Students & Questions</CardTitle>
+                <CardDescription>Select students, then manage which questions each student will receive.</CardDescription>
             </CardHeader>
             <CardContent>
                 {isLoading ? (
@@ -208,7 +227,7 @@ function AssignStudents({ selectedStudents, onSelectionChange }: { selectedStude
                         <Loader2 className="animate-spin text-primary"/>
                     </div>
                 ) : allStudents.length === 0 ? (
-                    <p className="text-muted-foreground text-center">No active students found.</p>
+                    <p className="text-muted-foreground text-center">No active students found. Add students before creating an exam.</p>
                 ) : (
                     <div className="space-y-4">
                         <div className="flex items-center space-x-2">
@@ -219,8 +238,8 @@ function AssignStudents({ selectedStudents, onSelectionChange }: { selectedStude
                             />
                             <Label htmlFor="select-all" className="font-bold">Select All Students</Label>
                         </div>
-                        <ScrollArea className="h-60 w-full rounded-md border p-4">
-                           <div className="space-y-2">
+                        <ScrollArea className="h-60 w-full rounded-md border">
+                           <div className="p-4 space-y-2">
                                 {allStudents.map(student => (
                                     <div key={student.id} className="flex items-center space-x-2">
                                         <Checkbox
@@ -235,11 +254,92 @@ function AssignStudents({ selectedStudents, onSelectionChange }: { selectedStude
                                 ))}
                             </div>
                         </ScrollArea>
+
+                        {selectedStudents.length > 0 && (
+                            <div>
+                                <h3 className="text-lg font-semibold mt-4 mb-2">Student Question Assignments</h3>
+                                 <div className="space-y-2 rounded-md border p-4">
+                                {selectedStudents.map(studentId => {
+                                    const student = getStudentById(studentId);
+                                    if (!student) return null;
+                                    const studentAssignments = assignments[studentId] || [];
+
+                                    return (
+                                        <div key={studentId} className="flex items-center justify-between p-2 rounded-md bg-secondary/50">
+                                            <div>
+                                                <p className="font-semibold">{student.name}</p>
+                                                <p className="text-sm text-muted-foreground">{studentAssignments.length} / {questionBank.length} questions assigned</p>
+                                            </div>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="outline" size="sm"><ListChecks className="mr-2 h-4 w-4"/>Manage Questions</Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader>
+                                                        <DialogTitle>Assign Questions for {student.name}</DialogTitle>
+                                                        <DialogDescription>Select the questions from the bank for this student.</DialogDescription>
+                                                    </DialogHeader>
+                                                    <QuestionAssignmentDialog 
+                                                        questionBank={questionBank}
+                                                        assignedQuestionIds={studentAssignments}
+                                                        onAssignmentChange={(questionIds) => onAssignmentChange(studentId, questionIds)}
+                                                    />
+                                                </DialogContent>
+                                            </Dialog>
+                                        </div>
+                                    )
+                                })}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </CardContent>
         </Card>
     );
+}
+
+function QuestionAssignmentDialog({ questionBank, assignedQuestionIds, onAssignmentChange }: {
+    questionBank: GeneratedQuestion[],
+    assignedQuestionIds: string[],
+    onAssignmentChange: (questionIds: string[]) => void
+}) {
+    const handleQuestionSelect = (qId: string, checked: boolean) => {
+        if (checked) {
+            onAssignmentChange([...assignedQuestionIds, qId]);
+        } else {
+            onAssignmentChange(assignedQuestionIds.filter(id => id !== qId));
+        }
+    }
+
+    if (questionBank.length === 0) {
+        return <p className="text-muted-foreground text-center p-8">The question bank is empty. Please add questions to the exam first.</p>
+    }
+
+    return (
+        <ScrollArea className="h-72">
+            <div className="p-1 space-y-2">
+                {questionBank.map(q => (
+                     <div key={q.id} className="flex items-start space-x-3 p-2 rounded-md hover:bg-muted">
+                        <Checkbox
+                            id={`q-${q.id}`}
+                            checked={assignedQuestionIds.includes(q.id)}
+                            onCheckedChange={(checked) => handleQuestionSelect(q.id, !!checked)}
+                        />
+                        <div className="grid gap-1.5 leading-none">
+                             <Label htmlFor={`q-${q.id}`} className="font-normal text-sm">
+                                {q.question}
+                             </Label>
+                              <p className="text-xs text-muted-foreground">
+                                Type: {q.type} | Answer: {q.answer}
+                              </p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </ScrollArea>
+    )
+
 }
 
 interface ExamFormProps {
@@ -257,9 +357,21 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
   const [status, setStatus] = useState<Exam['status']>('Draft');
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([]);
   const [assignedStudentIds, setAssignedStudentIds] = useState<string[]>([]);
-  
+  const [studentQuestionAssignments, setStudentQuestionAssignments] = useState<Record<string, string[]>>({});
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
+
   const router = useRouter();
   const { toast } = useToast();
+  
+  useEffect(() => {
+        const fetchStudents = async () => {
+            const studentsQuery = query(collection(db, "students"), where("status", "==", "Active"));
+            const snapshot = await getDocs(studentsQuery);
+            const studentList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Student));
+            setAllStudents(studentList);
+        };
+        fetchStudents();
+    }, []);
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
@@ -270,6 +382,7 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
         setStatus(initialData.exam.status);
         setQuestions(initialData.questions);
         setAssignedStudentIds(initialData.exam.assignedStudentIds || []);
+        setStudentQuestionAssignments(initialData.exam.studentQuestionAssignments || {});
     }
   }, [mode, initialData])
 
@@ -283,7 +396,22 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
       });
       return;
     }
-    const examData = { title, description, duration: Number(duration), date, status, assignedStudentIds };
+
+    // Validate that every assigned student has at least one question assigned
+    for (const studentId of assignedStudentIds) {
+        if (!studentQuestionAssignments[studentId] || studentQuestionAssignments[studentId].length === 0) {
+            const student = allStudents.find(s => s.id === studentId);
+            toast({
+                variant: "destructive",
+                title: "Incomplete Assignment",
+                description: `Student "${student?.name || 'Unknown'}" has no questions assigned. Please assign questions or un-assign the student.`
+            });
+            return;
+        }
+    }
+
+
+    const examData = { title, description, duration: Number(duration), date, status, assignedStudentIds, studentQuestionAssignments };
     onSubmit(examData, questions);
   }
 
@@ -291,12 +419,25 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
     setQuestions(prev => [...prev, newQuestion]);
      toast({
         title: "Question Added",
-        description: "The manually created question has been added to the exam.",
+        description: "The question has been added to the question bank.",
     });
   }
 
   const removeQuestion = (questionId: string) => {
     setQuestions(prev => prev.filter(q => q.id !== questionId));
+     // Also remove this question from all student assignments
+    const newAssignments = { ...studentQuestionAssignments };
+    for (const studentId in newAssignments) {
+        newAssignments[studentId] = newAssignments[studentId].filter(qId => qId !== questionId);
+    }
+    setStudentQuestionAssignments(newAssignments);
+  }
+
+  const handleAssignmentChange = (studentId: string, questionIds: string[]) => {
+      setStudentQuestionAssignments(prev => ({
+          ...prev,
+          [studentId]: questionIds
+      }));
   }
 
   return (
@@ -349,16 +490,14 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
           </div>
         </CardContent>
       </Card>
-      
-      <AssignStudents selectedStudents={assignedStudentIds} onSelectionChange={setAssignedStudentIds} />
-      
+
       <ManualQuestionCreator onQuestionAdded={addQuestionToExam} />
 
       {questions.length > 0 && (
           <Card>
               <CardHeader>
-                  <CardTitle>Exam Questions ({questions.length})</CardTitle>
-                  <CardDescription>The following questions will be added to the exam.</CardDescription>
+                  <CardTitle>Question Bank ({questions.length})</CardTitle>
+                  <CardDescription>This is the central pool of questions for this exam. Assign them to students below.</CardDescription>
               </CardHeader>
               <CardContent>
                   <Accordion type="single" collapsible className="w-full">
@@ -389,10 +528,19 @@ export function ExamForm({ mode, initialData, onSubmit, isLoading }: ExamFormPro
               </CardContent>
           </Card>
       )}
-
+      
+      <AssignStudents 
+        allStudents={allStudents}
+        questionBank={questions}
+        selectedStudents={assignedStudentIds} 
+        onSelectionChange={setAssignedStudentIds}
+        assignments={studentQuestionAssignments}
+        onAssignmentChange={handleAssignmentChange}
+      />
+      
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={() => router.push('/admin/exams')}>Cancel</Button>
-        <Button type="submit" disabled={isLoading || questions.length === 0} className="bg-accent hover:bg-accent/90">
+        <Button type="submit" disabled={isLoading} className="bg-accent hover:bg-accent/90">
             {isLoading ? (mode === 'create' ? "Creating..." : "Saving...") : (mode === 'create' ? "Create Exam" : "Save Changes")}
         </Button>
       </div>
