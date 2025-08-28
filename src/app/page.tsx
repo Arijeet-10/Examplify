@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpenCheck, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Captcha } from "@/components/captcha";
 
@@ -30,7 +30,7 @@ export default function Home() {
   const [studentId, setStudentId] = useState("");
   const [studentPassword, setStudentPassword] = useState("");
   const [adminUserId, setAdminUserId] = useState("");
-  const [adminPassword, setAdminPassword] = useState("12245");
+  const [adminPassword, setAdminPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("student");
   
@@ -82,24 +82,14 @@ export default function Home() {
     e.preventDefault();
     setIsLoading(true);
 
-    if (adminUserId !== 'admin@gmail.com' || adminPassword !== '012245') {
-        toast({
-            variant: "destructive",
-            title: "Login Failed",
-            description: "Invalid Admin User ID or Password.",
-        });
-        setIsLoading(false);
-        return;
-    }
-
     try {
-      await signInWithEmailAndPassword(auth, 'admin@gmail.com', adminPassword);
+      await signInWithEmailAndPassword(auth, adminUserId, adminPassword);
       router.push("/admin/dashboard");
     } catch (error) {
        toast({
         variant: "destructive",
         title: "Login Failed",
-        description: "Invalid admin credentials. Please ensure the admin user (admin@example.com) is set up in Firebase with the correct password.",
+        description: "Invalid admin credentials. Please ensure the admin user is set up in Firebase with the correct password.",
       });
     } finally {
       setIsLoading(false);
@@ -114,7 +104,10 @@ export default function Home() {
           <Card className="shadow-2xl overflow-hidden">
             <CardHeader className="text-center pt-8">
               <div className="flex justify-center items-center gap-2 mb-2">
-                <BookOpenCheck className="h-8 w-8 text-primary" />
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-primary">
+                  <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                  <path d="M14.22 8.3C14.53 8.01 14.51 7.5 14.19 7.21C13.88 6.91 13.37 6.94 13.08 7.27L10.23 10.47C9.94 10.8 9.94 11.31 10.24 11.63L13.08 14.73C13.37 15.06 13.88 15.09 14.19 14.79C14.51 14.5 14.53 13.99 14.22 13.7L11.85 11.05L14.22 8.3Z" fill="currentColor"/>
+                </svg>
                 <h1 className="text-3xl font-bold font-headline text-primary">
                   Examplify
                 </h1>
