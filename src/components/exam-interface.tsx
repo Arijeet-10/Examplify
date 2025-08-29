@@ -29,10 +29,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Wifi } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Exam, GeneratedQuestion as Question } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { useNetworkSpeed } from "@/hooks/use-network-speed";
 
 
 export function ExamInterface({ examId }: { examId: string }) {
@@ -49,6 +50,8 @@ export function ExamInterface({ examId }: { examId: string }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<{ [key: string]: string }>({});
   const [timeLeft, setTimeLeft] = useState(0);
+
+  const { speed, type } = useNetworkSpeed();
 
   useEffect(() => {
     if (authLoading) return;
@@ -266,11 +269,17 @@ export function ExamInterface({ examId }: { examId: string }) {
   return (
     <div className="flex flex-col items-center justify-center p-4 md:p-6 min-h-full">
       <Card className="w-full max-w-4xl shadow-lg">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl font-headline">
+        <CardHeader className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <CardTitle className="text-2xl font-headline text-center md:text-left">
             {exam.title}
           </CardTitle>
           <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2 text-sm font-semibold" title={`Connection type: ${type}`}>
+                <Wifi className={`w-5 h-5 ${speed === null ? 'text-muted-foreground' : speed > 1 ? 'text-green-500' : 'text-destructive'}`} />
+                <span>
+                    {speed !== null ? `${speed.toFixed(1)} Mbps` : 'N/A'}
+                </span>
+             </div>
              <div className="flex items-center gap-2">
                 <div className={`w-3 h-3 rounded-full ${timeLeft < 300 ? 'bg-destructive' : 'bg-green-500'} animate-pulse`}></div>
                 <span className={`font-semibold ${timeLeft < 300 ? 'text-destructive' : 'text-foreground'}`}>
