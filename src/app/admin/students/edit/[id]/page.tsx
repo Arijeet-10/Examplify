@@ -16,7 +16,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { updatePassword, signInWithEmailAndPassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 
-export default function EditStudentPage({ params: { id } }: { params: { id: string } }) {
+export default function EditStudentPage({ params }: { params: { id: string } }) {
+    const { id } = params;
     const [student, setStudent] = useState<Student | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);

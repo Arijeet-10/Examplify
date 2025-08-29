@@ -22,7 +22,8 @@ import { Button } from "@/components/ui/button";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
-export default function GradingPage({ params: { id } }: { params: { id: string } }) {
+export default function GradingPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const [exam, setExam] = useState<Exam | null>(null);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);

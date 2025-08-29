@@ -19,7 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
 
-export default function ViewStudentPage({ params: { id } }: { params: { id: string } }) {
+export default function ViewStudentPage({ params }: { params: { id: string } }) {
+    const { id } = params;
     const [student, setStudent] = useState<Student | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
