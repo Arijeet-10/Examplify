@@ -30,11 +30,33 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
 } from "@/components/ui/chart";
 import { Pie, PieChart, Cell } from "recharts";
 import { Button } from "@/components/ui/button";
 
-const CHART_COLORS = ["#3B82F6", "#F97316", "#10B981", "#6B7280"]; // Blue, Orange, Green, Gray
+const CHART_CONFIG = {
+  value: {
+    label: "Exams",
+  },
+  Published: {
+    label: "Published",
+    color: "hsl(var(--chart-1))",
+  },
+  Draft: {
+    label: "Draft",
+    color: "hsl(var(--chart-2))",
+  },
+  Ongoing: {
+    label: "Ongoing",
+    color: "hsl(var(--chart-3))",
+  },
+  Completed: {
+    label: "Completed",
+    color: "hsl(var(--chart-4))",
+  },
+};
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -82,11 +104,10 @@ export default function AdminDashboard() {
           return acc;
         }, {} as Record<string, number>);
 
-        const chartData = Object.entries(statuses).map(
-          ([name, value], index) => ({
+        const chartData = Object.entries(statuses).map(([name, value]) => ({
             name,
             value,
-            fill: CHART_COLORS[index % CHART_COLORS.length],
+            fill: `var(--color-${name})`
           })
         );
         setExamStatusData(chartData);
@@ -215,20 +236,20 @@ export default function AdminDashboard() {
         </Card>
 
         {/* Exam Status Chart */}
-        <Card className="lg:col-span-3">
+        <Card className="lg:col-span-3 flex flex-col">
           <CardHeader>
             <CardTitle>Exam Status Overview</CardTitle>
             <CardDescription>
               Distribution of exams by their current status.
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 pb-0">
             {isLoading ? (
               <Skeleton className="h-48 w-full" />
             ) : examStatusData.length > 0 ? (
               <ChartContainer
-                config={{}}
-                className="mx-auto aspect-square h-48"
+                config={CHART_CONFIG as any}
+                className="mx-auto aspect-square h-full"
               >
                 <PieChart>
                   <ChartTooltip
@@ -239,13 +260,14 @@ export default function AdminDashboard() {
                     data={examStatusData}
                     dataKey="value"
                     nameKey="name"
-                    innerRadius={50}
-                    strokeWidth={5}
+                    innerRadius="50%"
+                    strokeWidth={2}
                   >
-                    {examStatusData.map((entry) => (
+                     {examStatusData.map((entry) => (
                       <Cell key={`cell-${entry.name}`} fill={entry.fill} />
                     ))}
                   </Pie>
+                  <ChartLegend content={<ChartLegendContent nameKey="name" />} />
                 </PieChart>
               </ChartContainer>
             ) : (
@@ -254,13 +276,13 @@ export default function AdminDashboard() {
                 </p>
             )}
           </CardContent>
-           <CardFooter className="flex flex-col items-start gap-2 text-sm">
-                <div className="flex gap-2 font-medium leading-none">
-                    Trending up by 5.2% this month <ArrowRight className="h-4 w-4" />
-                </div>
-                <div className="leading-none text-muted-foreground">
-                    Showing total visitors for the last 6 months
-                </div>
+           <CardFooter className="flex-col gap-2 text-sm pt-4">
+                <Button asChild variant="outline" size="sm" className="w-full">
+                    <Link href="/admin/exams">
+                        Manage All Exams
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
           </CardFooter>
         </Card>
       </div>
