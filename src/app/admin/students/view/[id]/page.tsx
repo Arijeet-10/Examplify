@@ -111,7 +111,7 @@ export default function ViewStudentPage({ params }: { params: { id: string } }) 
                          <div className="grid gap-1.5">
                             <p className="font-medium text-muted-foreground">Status</p>
                             <div>
-                               <Badge variant={student.status === "Active" ? "default" : "secondary"}>
+                               <Badge variant={student.status === "Active" ? "success" : "destructive"}>
                                  {student.status}
                                </Badge>
                             </div>

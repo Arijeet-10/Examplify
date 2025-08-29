@@ -150,7 +150,7 @@ export default function StudentsPage() {
                 <CardContent className="flex-grow space-y-2 text-sm">
                     <p className="text-muted-foreground truncate">{student.email}</p>
                     <p>Student ID: <span className="font-semibold">{student.studentId}</span></p>
-                    <Badge variant={student.status === "Active" ? "default" : "secondary"}>
+                    <Badge variant={student.status === "Active" ? "success" : "destructive"}>
                         {student.status}
                     </Badge>
                 </CardContent>
@@ -163,7 +163,7 @@ export default function StudentsPage() {
                     </Button>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive-outline" size="icon">
+                            <Button variant="destructive-outline" size="icon" disabled={student.status === 'Inactive'}>
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         </AlertDialogTrigger>
