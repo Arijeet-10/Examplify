@@ -52,6 +52,12 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
     const [options, setOptions] = useState(['', '']);
     const [answer, setAnswer] = useState('');
     const { toast } = useToast();
+    const [manualId, setManualId] = useState('');
+
+    useEffect(() => {
+        // Generate the ID on the client side to avoid hydration mismatch
+        setManualId(`manual-${Date.now()}-${Math.random()}`);
+    }, []);
 
     const handleAddOption = () => {
         if (options.length < 5) {
@@ -99,19 +105,20 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
                 toast({ variant: "destructive", title: "Invalid Answer", description: "The selected answer must be one of the options." });
                 return;
             }
-            onQuestionAdded({ question, type: 'mcq', options, answer, id: `manual-${Date.now()}` });
+            onQuestionAdded({ question, type: 'mcq', options, answer, id: manualId });
         } else {
             if (!answer.trim()) {
                 toast({ variant: "destructive", title: "Missing Answer", description: "Please provide an answer for the descriptive question." });
                 return;
             }
-            onQuestionAdded({ question, type: 'descriptive', answer, id: `manual-${Date.now()}` });
+            onQuestionAdded({ question, type: 'descriptive', answer, id: manualId });
         }
 
-        // Reset form
+        // Reset form and generate new ID for the next question
         setQuestion('');
         setOptions(['', '']);
         setAnswer('');
+        setManualId(`manual-${Date.now()}-${Math.random()}`);
     };
 
     return (
