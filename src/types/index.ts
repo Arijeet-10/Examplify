@@ -19,7 +19,6 @@ export type Exam = {
     examId?: string; // for submissions
     submissions?: Submission[];
     assignedStudentIds?: string[]; // Array of student UIDs
-    studentQuestionAssignments?: Record<string, string[]>; // Map of studentId to array of questionIds
 };
 
 export type Student = {
@@ -60,4 +59,5 @@ export type Submission = {
 export type QuestionWithStudentAnswer = GeneratedQuestion & {
     studentAnswer: string;
 };
+
 

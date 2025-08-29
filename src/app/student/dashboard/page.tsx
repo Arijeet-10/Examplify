@@ -64,13 +64,11 @@ export default function StudentDashboard() {
         const data = doc.data();
         // Fetch all questions for the exam to get the full count
         const questionsSnapshot = await getDocs(collection(db, "exams", doc.id, "questions"));
-        const assignedQuestionIds = data.studentQuestionAssignments?.[user.uid] || [];
         
         return {
           id: doc.id,
           ...data,
-          // The number of questions for the student is the count of their assigned questions
-          questionCount: assignedQuestionIds.length,
+          questionCount: questionsSnapshot.size,
         } as Exam;
       });
 
