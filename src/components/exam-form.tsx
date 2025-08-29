@@ -133,7 +133,7 @@ function ManualQuestionCreator({ onQuestionAdded }: { onQuestionAdded: (question
 
                 <div className="space-y-2">
                     <Label htmlFor="manual-question">Question</Label>
-                    <Textarea id="manual-question" placeholder="Enter the question text" value={question} onChange={e => setQuestion(e.target.value)} />
+                    <Textarea id="manual-question" placeholder="e.g., What is the capital of India?" value={question} onChange={e => setQuestion(e.target.value)} />
                 </div>
                 
                 {questionType === 'mcq' ? (

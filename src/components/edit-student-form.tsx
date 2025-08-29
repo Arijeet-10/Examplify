@@ -75,7 +75,7 @@ export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFor
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="Aarav Sharma" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -101,7 +101,7 @@ export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFor
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="+1 234 567 890" {...field} />
+                <Input placeholder="+91 98765 43210" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

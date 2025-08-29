@@ -72,7 +72,7 @@ export function EditAdminForm({ profile, onUpdate, isLoading, loginEmail }: Edit
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="Priya Patel" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -98,7 +98,7 @@ export function EditAdminForm({ profile, onUpdate, isLoading, loginEmail }: Edit
             <FormItem>
               <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="+1 234 567 890" {...field} />
+                <Input placeholder="+91 98765 43210" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
