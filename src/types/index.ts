@@ -44,8 +44,10 @@ export type Admin = {
 export type Submission = {
     id: string;
     examId: string;
-    studentId: string;
+    studentId: string; // This is the UID from auth
     studentName: string;
+    studentIdentifier: string; // This is the Student ID (e.g. STU001)
+    studentEmail: string;
     submittedAt: {
         seconds: number;
         nanoseconds: number;
@@ -59,5 +61,6 @@ export type Submission = {
 export type QuestionWithStudentAnswer = GeneratedQuestion & {
     studentAnswer: string;
 };
+
 
 

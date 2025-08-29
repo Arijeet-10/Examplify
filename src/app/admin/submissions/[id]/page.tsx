@@ -133,10 +133,18 @@ export default function SubmissionDetailsPage({ params }: { params: { id: string
           <CardDescription>Reviewing submission for exam: <strong>{exam?.title}</strong></CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
             <div>
               <p className="font-semibold">Student Name</p>
               <p className="text-muted-foreground">{submission?.studentName}</p>
+            </div>
+             <div>
+              <p className="font-semibold">Student ID</p>
+              <p className="text-muted-foreground">{submission?.studentIdentifier}</p>
+            </div>
+             <div>
+              <p className="font-semibold">Student Email</p>
+              <p className="text-muted-foreground">{submission?.studentEmail}</p>
             </div>
             <div>
               <p className="font-semibold">Submitted On</p>

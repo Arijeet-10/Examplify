@@ -31,7 +31,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { AlertCircle, Loader2, Wifi } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Exam, GeneratedQuestion as Question } from "@/types";
+import type { Exam, GeneratedQuestion as Question, Student } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { useNetworkSpeed } from "@/hooks/use-network-speed";
 
@@ -171,10 +171,21 @@ export function ExamInterface({ examId }: { examId: string }) {
     try {
         if (!user) throw new Error("User not authenticated.");
 
+        // Fetch student details
+        const studentDocRef = doc(db, "students", user.uid);
+        const studentSnapshot = await getDoc(studentDocRef);
+        if (!studentSnapshot.exists()) {
+            throw new Error("Could not find student profile.");
+        }
+        const studentData = studentSnapshot.data() as Student;
+
+
         const submissionData = {
             examId: examId,
             studentId: user.uid,
-            studentName: user.displayName || user.email || "Anonymous", // Get student name if available
+            studentName: studentData.name,
+            studentIdentifier: studentData.studentId,
+            studentEmail: studentData.email,
             submittedAt: serverTimestamp(),
             answers,
             score,
