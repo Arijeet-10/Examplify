@@ -93,17 +93,18 @@ export function ExamInterface({ examId }: { examId: string }) {
             throw new Error("No questions have been assigned to you for this exam.");
         }
 
-        // Fetch only the assigned questions from the question bank
+        // Fetch all questions from the question bank for this exam
         const questionsColRef = collection(db, "exams", examId, "questions");
-        const questionsQuery = query(questionsColRef, where(documentId(), "in", assignedQuestionIds));
-        const questionsSnapshot = await getDocs(questionsQuery);
-
-        const fetchedQuestions = questionsSnapshot.docs.map(doc => ({
+        const questionsSnapshot = await getDocs(questionsColRef);
+        const allQuestions = questionsSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Question[];
+        
+        // Filter the questions on the client-side based on assigned IDs
+        const assignedQuestions = allQuestions.filter(q => assignedQuestionIds.includes(q.id));
 
-        if (fetchedQuestions.length === 0) {
+        if (assignedQuestions.length === 0) {
             throw new Error("Could not load your assigned questions.");
         }
 
@@ -119,7 +120,7 @@ export function ExamInterface({ examId }: { examId: string }) {
           return array;
         }
 
-        setQuestions(shuffleArray(fetchedQuestions));
+        setQuestions(shuffleArray(assignedQuestions));
 
       } catch (err: any) {
         console.error("Error fetching exam data:", err);
@@ -365,3 +366,5 @@ export function ExamInterface({ examId }: { examId: string }) {
     </div>
   );
 }
+
+    

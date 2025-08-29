@@ -62,11 +62,15 @@ export default function StudentDashboard() {
     const unsubscribeExams = onSnapshot(examsQuery, async (snapshot) => {
       const examListPromises = snapshot.docs.map(async (doc) => {
         const data = doc.data();
+        // Fetch all questions for the exam to get the full count
         const questionsSnapshot = await getDocs(collection(db, "exams", doc.id, "questions"));
+        const assignedQuestionIds = data.studentQuestionAssignments?.[user.uid] || [];
+        
         return {
           id: doc.id,
           ...data,
-          questionCount: questionsSnapshot.size,
+          // The number of questions for the student is the count of their assigned questions
+          questionCount: assignedQuestionIds.length,
         } as Exam;
       });
 
@@ -176,3 +180,5 @@ export default function StudentDashboard() {
     </div>
   );
 }
+
+    
