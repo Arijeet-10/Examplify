@@ -138,7 +138,7 @@ export default function ViewStudentPage({ params: { id } }: { params: { id: stri
                 <CardHeader className="flex flex-col items-center bg-muted/30 p-8 text-center">
                     <div className="relative group">
                          <Avatar className="h-32 w-32 border-4 border-background shadow-md">
-                            <AvatarImage src={student.photoURL} alt={student.name} />
+                            <AvatarImage src={student.photoURL || `https://picsum.photos/seed/${student.id}/200`} alt={student.name} data-ai-hint="person face" />
                             <AvatarFallback className="text-4xl">
                                 {student.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
