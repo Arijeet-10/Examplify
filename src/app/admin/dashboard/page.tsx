@@ -249,7 +249,7 @@ export default function AdminDashboard() {
             ) : examStatusData.length > 0 ? (
               <ChartContainer
                 config={CHART_CONFIG as any}
-                className="mx-auto aspect-square h-full"
+                className="mx-auto aspect-square h-[250px]"
               >
                 <PieChart>
                   <ChartTooltip
