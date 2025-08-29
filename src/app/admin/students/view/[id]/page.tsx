@@ -18,7 +18,7 @@ import { format } from "date-fns";
 
 
 export default function ViewStudentPage({ params }: { params: { id: string } }) {
-    const { id } = params;
+    const id = params.id;
     const [student, setStudent] = useState<Student | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

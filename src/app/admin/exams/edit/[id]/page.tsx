@@ -14,7 +14,7 @@ import { AlertCircle } from "lucide-react";
 
 
 export default function EditExamPage({ params }: { params: { id: string } }) {
-    const { id } = params;
+    const id = params.id;
     const [initialData, setInitialData] = useState<{exam: Exam, questions: GeneratedQuestion[]} | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);

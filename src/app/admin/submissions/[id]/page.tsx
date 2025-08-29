@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import type { Submission, Exam, GeneratedQuestion, QuestionWithStudentAnswer } from "@/types";
 
 export default function SubmissionDetailsPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+  const id = params.id;
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [exam, setExam] = useState<Exam | null>(null);
   const [questions, setQuestions] = useState<QuestionWithStudentAnswer[]>([]);
