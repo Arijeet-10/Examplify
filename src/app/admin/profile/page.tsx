@@ -70,7 +70,6 @@ export default function AdminProfilePage() {
         <Card>
             <CardHeader className="items-center text-center">
                 <Avatar className="h-24 w-24">
-                    <AvatarImage src={adminProfile?.photoURL || `https://picsum.photos/seed/${user.uid}/100`} data-ai-hint="person face" />
                     <AvatarFallback className="text-3xl">{adminProfile?.name?.charAt(0) || 'A'}</AvatarFallback>
                 </Avatar>
                 <CardTitle className="text-2xl mt-4">{adminProfile?.name || 'Administrator'}</CardTitle>

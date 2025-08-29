@@ -10,14 +10,41 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
+import { useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import type { Student } from "@/types";
 
 export function StudentHeader() {
   const [user] = useAuthState(auth);
+  const [student, setStudent] = useState<Student | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      const fetchStudent = async () => {
+        const studentDoc = await getDoc(doc(db, "students", user.uid));
+        if (studentDoc.exists()) {
+          setStudent(studentDoc.data() as Student);
+        }
+      };
+      fetchStudent();
+    }
+  }, [user]);
+
+  const getInitials = () => {
+    if (student?.name) {
+      return student.name.split(' ').map(n => n[0]).join('');
+    }
+    if (user?.displayName) {
+      return user.displayName.split(' ').map(n => n[0]).join('');
+    }
+    return 'S';
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -34,8 +61,7 @@ export function StudentHeader() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">
                 <Avatar>
-                  <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/student-avatar/100`} alt="Student" data-ai-hint="person face"/>
-                  <AvatarFallback>{user?.displayName?.split(' ').map(n => n[0]).join('') || 'S'}</AvatarFallback>
+                  <AvatarFallback>{getInitials()}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

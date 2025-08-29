@@ -143,7 +143,6 @@ export default function StudentsPage() {
             <Card key={student.id} className="flex flex-col text-center">
                 <CardHeader className="items-center">
                      <Avatar className="h-20 w-20">
-                        <AvatarImage src={student.photoURL || `https://picsum.photos/seed/${student.id}/100`} data-ai-hint="person face" />
                         <AvatarFallback className="text-2xl">{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <CardTitle className="text-lg">{student.name}</CardTitle>

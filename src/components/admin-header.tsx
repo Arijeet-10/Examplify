@@ -71,7 +71,6 @@ export function AdminHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar>
-                <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/100`} alt="Admin" data-ai-hint="person face" />
                 <AvatarFallback>A</AvatarFallback>
               </Avatar>
             </Button>

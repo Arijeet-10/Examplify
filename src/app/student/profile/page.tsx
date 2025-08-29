@@ -1,21 +1,19 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, updateDoc, onSnapshot } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage, auth } from "@/lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db, auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { useToast } from "@/hooks/use-toast";
 import type { Student } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, ArrowLeft, Camera, Loader2, LayoutDashboard } from "lucide-react";
+import { AlertCircle, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
@@ -24,11 +22,8 @@ export default function StudentProfilePage() {
     const [user, authLoading] = useAuthState(auth);
     const [student, setStudent] = useState<Student | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isUploading, setIsUploading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-    const { toast } = useToast();
-    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (authLoading) return;
@@ -55,46 +50,6 @@ export default function StudentProfilePage() {
 
         return () => unsubscribe();
     }, [user, authLoading, router]);
-
-    const handleAvatarClick = () => {
-        fileInputRef.current?.click();
-    };
-    
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!user) return;
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        setIsUploading(true);
-        try {
-            // Upload file to Firebase Storage
-            const storageRef = ref(storage, `profile-pictures/${user.uid}/${file.name}`);
-            const uploadResult = await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(uploadResult.ref);
-
-            // Update student document in Firestore
-            const studentDocRef = doc(db, "students", user.uid);
-            await updateDoc(studentDocRef, {
-                photoURL: downloadURL
-            });
-
-            toast({
-                title: "Profile Picture Updated",
-                description: "The new profile picture has been saved.",
-            });
-
-        } catch (err: any) {
-            console.error("Error uploading file:", err);
-            toast({
-                variant: "destructive",
-                title: "Upload Failed",
-                description: err.message || "An error occurred while uploading the image.",
-            });
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
 
     if (isLoading || authLoading) {
         return (
@@ -145,30 +100,11 @@ export default function StudentProfilePage() {
             </div>
             <Card className="overflow-hidden">
                 <CardHeader className="flex flex-col items-center bg-muted/30 p-8 text-center">
-                    <div className="relative">
-                         <Avatar className="h-32 w-32">
-                            <AvatarImage src={student.photoURL} alt={student.name} />
-                            <AvatarFallback className="text-4xl">
-                                {student.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                        </Avatar>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="absolute bottom-2 right-2 rounded-full h-10 w-10"
-                            onClick={handleAvatarClick}
-                            disabled={isUploading}
-                        >
-                            {isUploading ? <Loader2 className="animate-spin" /> : <Camera className="h-5 w-5" />}
-                        </Button>
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            className="hidden"
-                            accept="image/png, image/jpeg"
-                        />
-                    </div>
+                    <Avatar className="h-32 w-32">
+                        <AvatarFallback className="text-4xl">
+                            {student.name.split(' ').map(n => n[0]).join('')}
+                        </AvatarFallback>
+                    </Avatar>
                     <CardTitle className="mt-4 text-3xl font-bold">{student.name}</CardTitle>
                     <CardDescription className="text-lg">{student.email}</CardDescription>
                 </CardHeader>
