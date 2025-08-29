@@ -145,7 +145,7 @@ export default function StudentProfilePage() {
             </div>
             <Card className="overflow-hidden">
                 <CardHeader className="flex flex-col items-center bg-muted/30 p-8 text-center">
-                    <div className="relative group">
+                    <div className="relative">
                          <Avatar className="h-32 w-32">
                             <AvatarImage src={student.photoURL} alt={student.name} />
                             <AvatarFallback className="text-4xl">
@@ -155,7 +155,7 @@ export default function StudentProfilePage() {
                         <Button
                             variant="outline"
                             size="icon"
-                            className="absolute bottom-2 right-2 rounded-full h-10 w-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute bottom-2 right-2 rounded-full h-10 w-10"
                             onClick={handleAvatarClick}
                             disabled={isUploading}
                         >

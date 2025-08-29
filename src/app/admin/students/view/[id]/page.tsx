@@ -136,7 +136,7 @@ export default function ViewStudentPage({ params: { id } }: { params: { id: stri
             </div>
             <Card className="overflow-hidden">
                 <CardHeader className="flex flex-col items-center bg-muted/30 p-8 text-center">
-                    <div className="relative group">
+                    <div className="relative">
                          <Avatar className="h-32 w-32 border-4 border-background shadow-md">
                             <AvatarImage src={student.photoURL || `https://picsum.photos/seed/${student.id}/200`} alt={student.name} data-ai-hint="person face" />
                             <AvatarFallback className="text-4xl">
@@ -146,7 +146,7 @@ export default function ViewStudentPage({ params: { id } }: { params: { id: stri
                         <Button
                             variant="outline"
                             size="icon"
-                            className="absolute bottom-1 right-1 rounded-full h-10 w-10 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 backdrop-blur-sm"
+                            className="absolute bottom-1 right-1 rounded-full h-10 w-10 bg-background/70 backdrop-blur-sm"
                             onClick={handleAvatarClick}
                             disabled={isUploading}
                         >
