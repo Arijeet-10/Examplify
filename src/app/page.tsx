@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Captcha } from "@/components/captcha";
 
@@ -42,7 +42,8 @@ export default function Home() {
   
   const [isStudentCaptchaVerified, setIsStudentCaptchaVerified] = useState(false);
   const [isAdminCaptchaVerified, setIsAdminCaptchaVerified] = useState(false);
-
+  const [showStudentPassword, setShowStudentPassword] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,9 +138,25 @@ export default function Home() {
                   onChange={e => setAdminUserId(e.target.value)}
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="admin-password">Password</Label>
-                <Input id="admin-password" type="password" required placeholder="••••••••" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} />
+                <Input 
+                    id="admin-password" 
+                    type={showAdminPassword ? "text" : "password"} 
+                    required placeholder="••••••••" 
+                    value={adminPassword} 
+                    onChange={e => setAdminPassword(e.target.value)} 
+                    className="pr-10"
+                />
+                 <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute bottom-1 right-1 h-7 w-7"
+                    onClick={() => setShowAdminPassword(prev => !prev)}
+                >
+                    {showAdminPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
               </div>
                 <div className="space-y-2">
                 <Label>Verification</Label>
@@ -176,9 +193,26 @@ export default function Home() {
                     <Label htmlFor="student-id">Student ID</Label>
                     <Input id="student-id" placeholder="Enter your student ID" required value={studentId} onChange={e => setStudentId(e.target.value)} />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 relative">
                     <Label htmlFor="student-password">Password</Label>
-                    <Input id="student-password" type="password" placeholder="Enter your password" required value={studentPassword} onChange={e => setStudentPassword(e.target.value)} />
+                    <Input 
+                        id="student-password" 
+                        type={showStudentPassword ? "text" : "password"} 
+                        placeholder="Enter your password" 
+                        required 
+                        value={studentPassword} 
+                        onChange={e => setStudentPassword(e.target.value)}
+                        className="pr-10"
+                    />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute bottom-1 right-1 h-7 w-7"
+                        onClick={() => setShowStudentPassword(prev => !prev)}
+                    >
+                        {showStudentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
                   </div>
                    <div className="space-y-2">
                     <Label>Verification</Label>

@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import type { Student } from "@/types";
 import { Label } from "@/components/ui/label";
 
@@ -44,6 +45,9 @@ type EditStudentFormProps = {
 };
 
 export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFormProps) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -137,7 +141,23 @@ export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFor
             <FormItem>
               <FormLabel>New Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                 <div className="relative">
+                    <Input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="pr-10"
+                    />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute bottom-1 right-1 h-7 w-7"
+                        onClick={() => setShowPassword(prev => !prev)}
+                    >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -150,7 +170,23 @@ export function EditStudentForm({ student, onUpdate, isLoading }: EditStudentFor
             <FormItem>
               <FormLabel>Confirm New Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                 <div className="relative">
+                    <Input 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        placeholder="••••••••" 
+                        {...field} 
+                        className="pr-10"
+                    />
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute bottom-1 right-1 h-7 w-7"
+                        onClick={() => setShowConfirmPassword(prev => !prev)}
+                    >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
