@@ -133,7 +133,7 @@ export function AddStudentForm({ onFinished }: { onFinished: () => void }) {
           name="phone"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone Number (Optional)</FormLabel>
+              <FormLabel>Phone Number</FormLabel>
               <FormControl>
                 <Input placeholder="+91 98765 43210" {...field} />
               </FormControl>
