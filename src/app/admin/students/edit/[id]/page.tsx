@@ -51,7 +51,7 @@ export default function EditStudentPage({ params }: { params: { id: string } }) 
         }
     }, [id]);
 
-    const handleUpdateStudent = async (data: { name: string; studentId: string; status: "Active" | "Inactive"; phone?: string; password?: string }) => {
+    const handleUpdateStudent = async (data: { name: string; studentId: string; status: "Active" | "Inactive"; phone: string; password?: string }) => {
         setIsSubmitting(true);
         try {
             const studentDocRef = doc(db, "students", id);
@@ -61,7 +61,7 @@ export default function EditStudentPage({ params }: { params: { id: string } }) 
                 name: data.name,
                 studentId: data.studentId,
                 status: data.status,
-                phone: data.phone || "",
+                phone: data.phone,
             });
 
             // Update password in Auth if provided
@@ -154,7 +154,7 @@ export default function EditStudentPage({ params }: { params: { id: string } }) 
                     {student && (
                         <EditStudentForm
                             student={student}
-                            onUpdate={handleUpdateStudent}
+                            onUpdate={handleUpdateStudent as any}
                             isLoading={isSubmitting}
                         />
                     )}

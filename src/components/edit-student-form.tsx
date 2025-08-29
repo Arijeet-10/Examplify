@@ -30,7 +30,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   studentId: z.string().min(1, { message: "Student ID cannot be empty." }),
   status: z.enum(["Active", "Inactive"]),
-  phone: z.string().optional(),
+  phone: z.string().min(1, { message: "Phone number is required." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional().or(z.literal('')),
   confirmPassword: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -40,7 +40,7 @@ const formSchema = z.object({
 
 type EditStudentFormProps = {
   student: Student;
-  onUpdate: (data: z.infer<typeof formSchema>) => Promise<void>;
+  onUpdate: (data: Omit<z.infer<typeof formSchema>, 'phone'> & { phone: string }) => Promise<void>;
   isLoading: boolean;
 };
 

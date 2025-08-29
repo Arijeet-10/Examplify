@@ -27,7 +27,7 @@ const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
   studentId: z.string().min(1, { message: "Student ID cannot be empty." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  phone: z.string().optional(),
+  phone: z.string().min(1, { message: "Phone number is required." }),
 });
 
 export function AddStudentForm({ onFinished }: { onFinished: () => void }) {
@@ -58,7 +58,7 @@ export function AddStudentForm({ onFinished }: { onFinished: () => void }) {
         name: values.name,
         email: values.email,
         studentId: values.studentId,
-        phone: values.phone || "",
+        phone: values.phone,
         status: "Active",
         joined: format(new Date(), 'yyyy-MM-dd'),
       });
