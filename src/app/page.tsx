@@ -27,7 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { ReCaptcha } from "@/components/recaptcha";
+import { Captcha } from "@/components/captcha";
 
 
 export default function Home() {
@@ -160,7 +160,7 @@ export default function Home() {
               </div>
                 <div className="space-y-2">
                 <Label>Verification</Label>
-                <ReCaptcha onVerified={setIsAdminCaptchaVerified} />
+                <Captcha onVerified={setIsAdminCaptchaVerified} />
               </div>
               <Button type="submit" className="w-full mt-2" disabled={isLoading || !isAdminCaptchaVerified}>
                 {isLoading ? <Loader2 className="animate-spin" /> : "Admin Login"}
@@ -216,7 +216,7 @@ export default function Home() {
                   </div>
                    <div className="space-y-2">
                     <Label>Verification</Label>
-                    <ReCaptcha onVerified={setIsStudentCaptchaVerified} />
+                    <Captcha onVerified={setIsStudentCaptchaVerified} />
                   </div>
                   <Button type="submit" className="w-full mt-2" disabled={isLoading || !isStudentCaptchaVerified}>
                     {isLoading ? <Loader2 className="animate-spin" /> : "Student Login"}
