@@ -19,13 +19,6 @@ export function Captcha({ onVerified }: CaptchaProps) {
   const [styles, setStyles] = useState<React.CSSProperties[]>([]);
   const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    // This effect runs only on the client, after the component has mounted.
-    setIsClient(true);
-    generateCaptcha();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const generateCaptcha = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let randomText = "";
@@ -42,6 +35,13 @@ export function Captcha({ onVerified }: CaptchaProps) {
     }));
     setStyles(newStyles);
   };
+
+  useEffect(() => {
+    // This effect runs only on the client, after the component has mounted.
+    setIsClient(true);
+    generateCaptcha();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (userInput.toLowerCase() === captchaText.toLowerCase() && userInput.length > 0) {
@@ -65,11 +65,8 @@ export function Captcha({ onVerified }: CaptchaProps) {
   if (!isClient) {
     return (
         <div className="space-y-2">
-            <div className="flex items-center gap-4">
-                <Skeleton className="h-12 flex-1" />
-                <Skeleton className="h-10 w-10" />
-            </div>
-             <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-10 w-full" />
         </div>
     );
   }
