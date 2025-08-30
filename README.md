@@ -1,22 +1,24 @@
-# Examplify: Online Examination Portal
+# Examplify: A Modern Online Examination Portal
 
-This project is a comprehensive online examination portal called **Examplify**. It is designed with a clear separation of roles for administrators and students, providing a robust platform for creating, managing, and taking exams online.
+Examplify is a comprehensive, full-stack online examination portal designed to streamline the process of creating, managing, and taking exams. Built with a focus on security, user experience, and administrative efficiency, it provides a robust platform for educational institutions and organizations to modernize their assessment workflows. The application features a clear separation of roles, with dedicated portals for both administrators and students, ensuring a secure and intuitive experience for all users.
 
-### Key Features:
+### For Administrators: A Powerful Control Center
 
-*   **Dual User Portals**: Secure and separate login interfaces for administrators and students.
-*   **Administrator Dashboard**: A central hub for admins to get a quick overview of key metrics, including the total number of students, exams, and submissions. It also features a chart visualizing the status of all exams (e.g., Draft, Published, Ongoing).
-*   **Exam Management**: Admins have full control over the exam lifecycle. They can create new exams with detailed information like titles, descriptions, time limits, and dates. They can also edit, view, and delete existing exams.
-*   **Dynamic Question Bank**: Each exam has its own question bank, where administrators can add either multiple-choice questions (MCQs) or descriptive (long-answer) questions.
-*   **Student Management**: Admins can manage the student roster, including adding new students, viewing their profiles, editing their information, and changing their account status between "Active" and "Inactive".
-*   **Grading and Monitoring**: The platform supports auto-grading for multiple-choice questions. Admins can view detailed submission results, see individual student answers, and monitor exams in real-time as submissions come in. Results can also be downloaded as a PDF for record-keeping.
-*   **Student Exam Experience**: Students can log in to their dashboard to see all available exams. The exam interface includes a timer, progress tracking, and question shuffling to ensure fairness. It also features a real-time network speed indicator to give students confidence in their connection.
+The administrator portal serves as the central hub for all examination-related activities. Upon logging in, admins are greeted with a dashboard that offers an at-a-glance overview of key metrics, including the total number of registered students, created exams, and completed submissions. A dynamic pie chart visualizes the current status of all exams—whether they are in "Draft," "Published," "Ongoing," or "Completed"—providing immediate insight into the examination lifecycle.
+
+Admins have granular control over exam management. They can create new exams with specific details such as titles, descriptions, time limits, and scheduled dates. Each exam is supported by a dedicated question bank, allowing for the addition of both multiple-choice questions (MCQs), which are auto-graded, and descriptive (long-answer) questions. Student management is equally comprehensive, enabling admins to add, view, edit, and manage the status of student accounts.
+
+To ensure academic integrity and provide timely feedback, Examplify includes a real-time monitoring dashboard for ongoing exams and a detailed grading section. Here, admins can review individual submissions, see student answers, and download consolidated results as a PDF for official records.
+
+### For Students: A Seamless and Fair-Taking Experience
+
+The student portal is designed to be simple, secure, and focused. After logging in, students are presented with a clean dashboard listing all their available exams. The exam-taking interface is built to minimize distractions and anxiety, featuring a persistent timer, a progress bar to track completed questions, and automatic question shuffling to ensure fairness. A unique real-time network speed indicator gives students peace of mind about their internet connection's stability during the test.
 
 ### Tech Stack
 
-*   **Framework**: Next.js
-*   **Language**: TypeScript
-*   **UI**: React, ShadCN UI, Tailwind CSS
-*   **Backend**: Firebase (Firestore, Authentication, Storage)
-*   **Icons**: Lucide React
-*   **Charts**: Recharts
+- **Framework**: Next.js (App Router)
+- **Language**: TypeScript
+- **UI**: React, ShadCN UI, Tailwind CSS
+- **Backend**: Firebase (Firestore, Authentication)
+- **Icons**: Lucide React
+- **Charts**: Recharts
