@@ -2,7 +2,7 @@
 "use client";
 
 import { useAuthState } from "react-firebase-hooks/auth";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, setDoc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,11 +21,29 @@ export default function AdminProfilePage() {
   useEffect(() => {
     if (user) {
         const adminDocRef = doc(db, "admins", user.uid);
-        const unsubscribe = onSnapshot(adminDocRef, (doc) => {
-            if (doc.exists()) {
-                setAdminProfile(doc.data() as Admin);
+
+        const unsubscribe = onSnapshot(adminDocRef, async (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                setAdminProfile(docSnapshot.data() as Admin);
+                setIsProfileLoading(false);
+            } else {
+                // If profile doesn't exist, create one.
+                try {
+                    const newProfile: Admin = {
+                        id: user.uid,
+                        email: user.email || "",
+                        name: user.displayName || "New Admin",
+                        designation: "Administrator",
+                        phone: "",
+                    };
+                    await setDoc(adminDocRef, newProfile);
+                    setAdminProfile(newProfile);
+                } catch (error) {
+                    console.error("Error creating admin profile:", error);
+                } finally {
+                    setIsProfileLoading(false);
+                }
             }
-            setIsProfileLoading(false);
         });
         return () => unsubscribe();
     } else if (!loading) {
