@@ -1,4 +1,4 @@
-# Examplify: A Modern Online Examination Portal
+n# Examplify: A Modern Online Examination Portal
 
 Examplify is a comprehensive, full-stack online examination portal designed to streamline the process of creating, managing, and taking exams. Built with a focus on security, user experience, and administrative efficiency, it provides a robust platform for educational institutions and organizations to modernize their assessment workflows. The application features a clear separation of roles, with dedicated portals for both administrators and students, ensuring a secure and intuitive experience for all users.
 

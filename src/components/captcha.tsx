@@ -19,7 +19,6 @@ export function Captcha({ onVerified }: CaptchaProps) {
   const [styles, setStyles] = useState<React.CSSProperties[]>([]);
   const [isClient, setIsClient] = useState(false);
 
-  // This function will only be called on the client
   const generateCaptcha = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let randomText = "";
@@ -36,10 +35,8 @@ export function Captcha({ onVerified }: CaptchaProps) {
     }));
     setStyles(newStyles);
   };
-
+  
   useEffect(() => {
-    // This effect runs only on the client, after the component has mounted.
-    // This prevents server/client mismatch.
     setIsClient(true);
     generateCaptcha();
     // eslint-disable-next-line react-hooks/exhaustive-deps
