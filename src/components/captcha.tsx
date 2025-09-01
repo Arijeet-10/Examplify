@@ -19,6 +19,10 @@ export function Captcha({ onVerified }: CaptchaProps) {
   const [styles, setStyles] = useState<React.CSSProperties[]>([]);
   const [isClient, setIsClient] = useState(false);
 
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const generateCaptcha = () => {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let randomText = "";
@@ -37,10 +41,11 @@ export function Captcha({ onVerified }: CaptchaProps) {
   };
   
   useEffect(() => {
-    setIsClient(true);
-    generateCaptcha();
+    if(isClient) {
+        generateCaptcha();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isClient]);
 
   useEffect(() => {
     if (userInput.toLowerCase() === captchaText.toLowerCase() && userInput.length > 0) {
